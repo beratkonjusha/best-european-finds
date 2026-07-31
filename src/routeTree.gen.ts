@@ -13,7 +13,10 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ImprintRouteImport } from './routes/imprint'
 import { Route as InfoRouteImport } from './routes/info'
+import { Route as InviteRouteImport } from './routes/invite'
+import { Route as ReviewsRouteImport } from './routes/reviews'
 import { Route as SavedRouteImport } from './routes/saved'
+import { Route as SupportRouteImport } from './routes/support'
 import { Route as ListingIdRouteImport } from './routes/listing.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -36,9 +39,24 @@ const InfoRoute = InfoRouteImport.update({
   path: '/info',
   getParentRoute: () => rootRouteImport,
 } as any)
+const InviteRoute = InviteRouteImport.update({
+  id: '/invite',
+  path: '/invite',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReviewsRoute = ReviewsRouteImport.update({
+  id: '/reviews',
+  path: '/reviews',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SavedRoute = SavedRouteImport.update({
   id: '/saved',
   path: '/saved',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ListingIdRoute = ListingIdRouteImport.update({
@@ -52,7 +70,10 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/imprint': typeof ImprintRoute
   '/info': typeof InfoRoute
+  '/invite': typeof InviteRoute
+  '/reviews': typeof ReviewsRoute
   '/saved': typeof SavedRoute
+  '/support': typeof SupportRoute
   '/listing/$id': typeof ListingIdRoute
 }
 export interface FileRoutesByTo {
@@ -60,7 +81,10 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/imprint': typeof ImprintRoute
   '/info': typeof InfoRoute
+  '/invite': typeof InviteRoute
+  '/reviews': typeof ReviewsRoute
   '/saved': typeof SavedRoute
+  '/support': typeof SupportRoute
   '/listing/$id': typeof ListingIdRoute
 }
 export interface FileRoutesById {
@@ -69,21 +93,45 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/imprint': typeof ImprintRoute
   '/info': typeof InfoRoute
+  '/invite': typeof InviteRoute
+  '/reviews': typeof ReviewsRoute
   '/saved': typeof SavedRoute
+  '/support': typeof SupportRoute
   '/listing/$id': typeof ListingIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/imprint' | '/info' | '/saved' | '/listing/$id'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/imprint'
+    | '/info'
+    | '/invite'
+    | '/reviews'
+    | '/saved'
+    | '/support'
+    | '/listing/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/imprint' | '/info' | '/saved' | '/listing/$id'
+  to:
+    | '/'
+    | '/auth'
+    | '/imprint'
+    | '/info'
+    | '/invite'
+    | '/reviews'
+    | '/saved'
+    | '/support'
+    | '/listing/$id'
   id:
     | '__root__'
     | '/'
     | '/auth'
     | '/imprint'
     | '/info'
+    | '/invite'
+    | '/reviews'
     | '/saved'
+    | '/support'
     | '/listing/$id'
   fileRoutesById: FileRoutesById
 }
@@ -92,7 +140,10 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ImprintRoute: typeof ImprintRoute
   InfoRoute: typeof InfoRoute
+  InviteRoute: typeof InviteRoute
+  ReviewsRoute: typeof ReviewsRoute
   SavedRoute: typeof SavedRoute
+  SupportRoute: typeof SupportRoute
   ListingIdRoute: typeof ListingIdRoute
 }
 
@@ -126,11 +177,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InfoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/invite': {
+      id: '/invite'
+      path: '/invite'
+      fullPath: '/invite'
+      preLoaderRoute: typeof InviteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reviews': {
+      id: '/reviews'
+      path: '/reviews'
+      fullPath: '/reviews'
+      preLoaderRoute: typeof ReviewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/saved': {
       id: '/saved'
       path: '/saved'
       fullPath: '/saved'
       preLoaderRoute: typeof SavedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/listing/$id': {
@@ -148,7 +220,10 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ImprintRoute: ImprintRoute,
   InfoRoute: InfoRoute,
+  InviteRoute: InviteRoute,
+  ReviewsRoute: ReviewsRoute,
   SavedRoute: SavedRoute,
+  SupportRoute: SupportRoute,
   ListingIdRoute: ListingIdRoute,
 }
 export const routeTree = rootRouteImport
