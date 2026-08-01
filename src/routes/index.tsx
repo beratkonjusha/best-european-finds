@@ -142,7 +142,7 @@ function FeedPage() {
     const { error } = await supabase.from("saved_searches").insert({
       user_id: user.id,
       label,
-      query: filters as unknown as Record<string, unknown>,
+      query: JSON.parse(JSON.stringify(filters)),
       notify: true,
     });
     if (error) toast.error(error.message);
