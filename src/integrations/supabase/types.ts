@@ -21,6 +21,9 @@ export type Database = {
           lat: number
           lng: number
           name: string
+          population: number | null
+          postal_code: string | null
+          region_id: string | null
         }
         Insert: {
           country_code: string
@@ -28,6 +31,9 @@ export type Database = {
           lat: number
           lng: number
           name: string
+          population?: number | null
+          postal_code?: string | null
+          region_id?: string | null
         }
         Update: {
           country_code?: string
@@ -35,6 +41,9 @@ export type Database = {
           lat?: number
           lng?: number
           name?: string
+          population?: number | null
+          postal_code?: string | null
+          region_id?: string | null
         }
         Relationships: [
           {
@@ -43,6 +52,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "countries"
             referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "cities_region_id_fkey"
+            columns: ["region_id"]
+            isOneToOne: false
+            referencedRelation: "regions"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -75,23 +91,64 @@ export type Database = {
           created_at: string
           id: string
           listing_id: string
+          snapshot: Json
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
           listing_id: string
+          snapshot?: Json
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
           listing_id?: string
+          snapshot?: Json
           user_id?: string
         }
         Relationships: [
           {
             foreignKeyName: "favorites_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      listing_translations: {
+        Row: {
+          attributes: Json
+          created_at: string
+          description: string | null
+          id: string
+          lang: string
+          listing_id: string
+          title: string
+        }
+        Insert: {
+          attributes?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          lang: string
+          listing_id: string
+          title: string
+        }
+        Update: {
+          attributes?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          lang?: string
+          listing_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listing_translations_listing_id_fkey"
             columns: ["listing_id"]
             isOneToOne: false
             referencedRelation: "listings"
@@ -112,14 +169,17 @@ export type Database = {
           fetched_at: string
           id: string
           images: Json
+          last_seen_at: string
           lat: number | null
           lng: number | null
           posted_at: string
           price_band: Database["public"]["Enums"]["price_band"] | null
           price_eur: number
           price_score: number | null
+          region_id: string | null
           segment_key: string | null
           source_id: string
+          source_lang: string | null
           title: string
           url: string
         }
@@ -135,14 +195,17 @@ export type Database = {
           fetched_at?: string
           id?: string
           images?: Json
+          last_seen_at?: string
           lat?: number | null
           lng?: number | null
           posted_at?: string
           price_band?: Database["public"]["Enums"]["price_band"] | null
           price_eur: number
           price_score?: number | null
+          region_id?: string | null
           segment_key?: string | null
           source_id: string
+          source_lang?: string | null
           title: string
           url: string
         }
@@ -158,14 +221,17 @@ export type Database = {
           fetched_at?: string
           id?: string
           images?: Json
+          last_seen_at?: string
           lat?: number | null
           lng?: number | null
           posted_at?: string
           price_band?: Database["public"]["Enums"]["price_band"] | null
           price_eur?: number
           price_score?: number | null
+          region_id?: string | null
           segment_key?: string | null
           source_id?: string
+          source_lang?: string | null
           title?: string
           url?: string
         }
@@ -183,6 +249,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "countries"
             referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "listings_region_id_fkey"
+            columns: ["region_id"]
+            isOneToOne: false
+            referencedRelation: "regions"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "listings_source_id_fkey"
@@ -229,6 +302,101 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          city: string | null
+          country_code: string | null
+          created_at: string
+          display_name: string | null
+          language: string
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          city?: string | null
+          country_code?: string | null
+          created_at?: string
+          display_name?: string | null
+          language?: string
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          city?: string | null
+          country_code?: string | null
+          created_at?: string
+          display_name?: string | null
+          language?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          created_at: string
+          endpoint: string
+          id: string
+          keys: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          endpoint: string
+          id?: string
+          keys?: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          endpoint?: string
+          id?: string
+          keys?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
+      regions: {
+        Row: {
+          code: string
+          country_code: string
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          code: string
+          country_code: string
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          code?: string
+          country_code?: string
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "regions_country_code_fkey"
+            columns: ["country_code"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
       reviews: {
         Row: {
           author_name: string
@@ -264,6 +432,7 @@ export type Database = {
           created_at: string
           id: string
           label: string
+          last_checked_at: string | null
           last_notified_at: string | null
           notify: boolean
           query: Json
@@ -273,6 +442,7 @@ export type Database = {
           created_at?: string
           id?: string
           label: string
+          last_checked_at?: string | null
           last_notified_at?: string | null
           notify?: boolean
           query?: Json
@@ -282,6 +452,7 @@ export type Database = {
           created_at?: string
           id?: string
           label?: string
+          last_checked_at?: string | null
           last_notified_at?: string | null
           notify?: boolean
           query?: Json
@@ -289,15 +460,56 @@ export type Database = {
         }
         Relationships: []
       }
+      source_events: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          level: string
+          message: string | null
+          meta: Json
+          source_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          level?: string
+          message?: string | null
+          meta?: Json
+          source_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          level?: string
+          message?: string | null
+          meta?: Json
+          source_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "source_events_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sources: {
         Row: {
           base_url: string
           categories: Database["public"]["Enums"]["listing_category"][]
           country_codes: string[]
           enabled: boolean
+          fail_count: number
           health: string
           id: string
+          last_error: string | null
           last_run_at: string | null
+          last_success_at: string | null
           legal_mode: string
           name: string
           slug: string
@@ -307,9 +519,12 @@ export type Database = {
           categories?: Database["public"]["Enums"]["listing_category"][]
           country_codes?: string[]
           enabled?: boolean
+          fail_count?: number
           health?: string
           id?: string
+          last_error?: string | null
           last_run_at?: string | null
+          last_success_at?: string | null
           legal_mode?: string
           name: string
           slug: string
@@ -319,9 +534,12 @@ export type Database = {
           categories?: Database["public"]["Enums"]["listing_category"][]
           country_codes?: string[]
           enabled?: boolean
+          fail_count?: number
           health?: string
           id?: string
+          last_error?: string | null
           last_run_at?: string | null
+          last_success_at?: string | null
           legal_mode?: string
           name?: string
           slug?: string
