@@ -75,3 +75,29 @@ export function formatAttribute(key: string, value: string | number, lang: Lang)
   }
   return String(value);
 }
+
+/**
+ * Relevanz-Score für die clientseitige Nachsortierung:
+ * Texttreffer + Aktualität + Preisbewertung.
+ */
+export function relevanceScore(
+  l: { title: string; posted_at: string; price_score: number | null; price_band: string | null },
+  term: string,
+): number {
+  let score = 0;
+  const q = term.trim().toLowerCase();
+  if (q) {
+    const title = l.title.toLowerCase();
+    if (title === q) score += 60;
+    else if (title.startsWith(q)) score += 40;
+    else if (title.includes(q)) score += 25;
+    const words = q.split(/\s+/).filter(Boolean);
+    score += words.filter((w) => title.includes(w)).length * 6;
+  }
+  const ageDays = (Date.now() - new Date(l.posted_at).getTime()) / 86_400_000;
+  score += Math.max(0, 30 - ageDays);
+  if (l.price_score != null) score += Math.max(-15, Math.min(25, -l.price_score * 10));
+  if (l.price_band === "great") score += 12;
+  else if (l.price_band === "good") score += 6;
+  return score;
+}
