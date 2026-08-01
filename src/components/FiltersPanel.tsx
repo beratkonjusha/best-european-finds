@@ -1,6 +1,7 @@
 import { useI18n } from "@/lib/i18n";
 import { CATEGORIES, RADIUS_OPTIONS, countryName, type Category } from "@/lib/format";
-import { useCities, useCountries, useSources } from "@/lib/reference-queries";
+import { useCountries, useRegions, useSources } from "@/lib/reference-queries";
+import { CityPicker } from "@/components/CityPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +18,7 @@ export type Filters = {
   q: string;
   category: Category | "all";
   country: string;
+  regionId: string;
   cityId: string;
   radius: number;
   sourceIds: string[];
@@ -28,6 +30,7 @@ export const DEFAULT_FILTERS: Filters = {
   q: "",
   category: "all",
   country: "",
+  regionId: "",
   cityId: "",
   radius: 0,
   sourceIds: [],
@@ -46,11 +49,10 @@ export function FiltersPanel({
 }) {
   const { t, lang } = useI18n();
   const countries = useCountries();
-  const cities = useCities(value.country);
+  const regions = useRegions(value.country);
   const sources = useSources();
 
-  const set = <K extends keyof Filters>(key: K, v: Filters[K]) =>
-    onChange({ ...value, [key]: v });
+  const set = <K extends keyof Filters>(key: K, v: Filters[K]) => onChange({ ...value, [key]: v });
 
   const visibleSources = (sources.data ?? []).filter((s) => {
     const catOk =
@@ -60,7 +62,7 @@ export function FiltersPanel({
   });
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6">
       <div className="space-y-2">
         <Label>{t("filters.category")}</Label>
         <div className="flex flex-wrap gap-2">
@@ -78,13 +80,19 @@ export function FiltersPanel({
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
+      <div className="grid min-w-0 gap-4 sm:grid-cols-2">
+        <div className="min-w-0 space-y-2">
           <Label>{t("filters.country")}</Label>
           <Select
             value={value.country || "any"}
             onValueChange={(v) =>
-              onChange({ ...value, country: v === "any" ? "" : v, cityId: "", sourceIds: [] })
+              onChange({
+                ...value,
+                country: v === "any" ? "" : v,
+                regionId: "",
+                cityId: "",
+                sourceIds: [],
+              })
             }
           >
             <SelectTrigger>
@@ -101,28 +109,41 @@ export function FiltersPanel({
           </Select>
         </div>
 
-        <div className="space-y-2">
-          <Label>{t("filters.city")}</Label>
+        <div className="min-w-0 space-y-2">
+          <Label>{t("filters.region")}</Label>
           <Select
-            value={value.cityId || "any"}
-            onValueChange={(v) => set("cityId", v === "any" ? "" : v)}
-            disabled={!value.country}
+            value={value.regionId || "any"}
+            onValueChange={(v) =>
+              onChange({ ...value, regionId: v === "any" ? "" : v, cityId: "" })
+            }
+            disabled={!value.country || (regions.data ?? []).length === 0}
           >
             <SelectTrigger>
-              <SelectValue />
+              <SelectValue placeholder={t("filters.anyRegion")} />
             </SelectTrigger>
             <SelectContent className="max-h-72">
-              <SelectItem value="any">{t("filters.anyCity")}</SelectItem>
-              {(cities.data ?? []).map((c) => (
-                <SelectItem key={c.id} value={c.id}>
-                  {c.name}
+              <SelectItem value="any">{t("filters.anyRegion")}</SelectItem>
+              {(regions.data ?? []).map((r) => (
+                <SelectItem key={r.id} value={r.id}>
+                  {r.name}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
 
-        <div className="space-y-2">
+        <div className="min-w-0 space-y-2">
+          <Label>{t("filters.city")}</Label>
+          <CityPicker
+            countryCode={value.country}
+            regionId={value.regionId}
+            value={value.cityId}
+            onChange={(id) => set("cityId", id)}
+          />
+          <p className="text-xs text-muted-foreground">{t("filters.cityHint")}</p>
+        </div>
+
+        <div className="min-w-0 space-y-2">
           <Label>{t("filters.radius")}</Label>
           <Select
             value={String(value.radius)}
@@ -142,8 +163,8 @@ export function FiltersPanel({
           </Select>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          <div className="space-y-2">
+        <div className="col-span-full grid grid-cols-2 gap-2">
+          <div className="min-w-0 space-y-2">
             <Label htmlFor="pmin">{t("filters.priceMin")}</Label>
             <Input
               id="pmin"
@@ -153,7 +174,7 @@ export function FiltersPanel({
               placeholder="0"
             />
           </div>
-          <div className="space-y-2">
+          <div className="min-w-0 space-y-2">
             <Label htmlFor="pmax">{t("filters.priceMax")}</Label>
             <Input
               id="pmax"
@@ -177,8 +198,9 @@ export function FiltersPanel({
           {visibleSources.map((s) => {
             const checked = value.sourceIds.includes(s.id);
             return (
-              <label key={s.id} className="flex items-center gap-2 text-sm">
+              <label key={s.id} className="flex min-w-0 items-center gap-2 text-sm">
                 <Checkbox
+                  className="shrink-0"
                   checked={checked}
                   onCheckedChange={() =>
                     set(
@@ -189,7 +211,12 @@ export function FiltersPanel({
                     )
                   }
                 />
-                <span className="truncate">{s.name}</span>
+                <span className="min-w-0 flex-1 truncate">{s.name}</span>
+                {s.health && s.health !== "ok" ? (
+                  <span className="shrink-0 rounded-full bg-price-high/15 px-1.5 py-0.5 text-[10px] text-price-high">
+                    !
+                  </span>
+                ) : null}
               </label>
             );
           })}

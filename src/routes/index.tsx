@@ -1,16 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
-import { SlidersHorizontal, Search } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { SlidersHorizontal, Search, Radio, BellPlus } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { ListingCard, type FeedListing } from "@/components/ListingCard";
 import { DEFAULT_FILTERS, FiltersPanel, type Filters } from "@/components/FiltersPanel";
 import { useI18n } from "@/lib/i18n";
+import { useAuth } from "@/hooks/useAuth";
 import { useFavorites } from "@/hooks/useFavorites";
-import { useCities } from "@/lib/reference-queries";
-import { LIST_SELECT } from "@/lib/reference-queries";
-import { boundingBox, SORTS, type SortKey } from "@/lib/format";
+import { useCity, LIST_SELECT } from "@/lib/reference-queries";
+import { boundingBox, relevanceScore, SORTS, DEFAULT_SORT, type SortKey } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -49,17 +50,15 @@ const PAGE_SIZE = 24;
 
 function FeedPage() {
   const { t } = useI18n();
+  const { user } = useAuth();
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const [queryInput, setQueryInput] = useState("");
-  const [sort, setSort] = useState<SortKey>("best_deal");
+  const [sort, setSort] = useState<SortKey>(DEFAULT_SORT);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [liveCount, setLiveCount] = useState(0);
   const { isFavorite, toggle } = useFavorites();
 
-  const cities = useCities(filters.country);
-  const selectedCity = useMemo(
-    () => (cities.data ?? []).find((c) => c.id === filters.cityId) ?? null,
-    [cities.data, filters.cityId],
-  );
+  const selectedCity = useCity(filters.cityId).data ?? null;
 
   const feed = useInfiniteQuery({
     queryKey: ["listings", filters, sort, selectedCity?.id ?? null],
@@ -70,11 +69,12 @@ function FeedPage() {
       let q = supabase.from("listings").select(LIST_SELECT).eq("active", true);
 
       if (filters.q.trim()) {
-        const term = filters.q.trim().replace(/[%,]/g, " ");
+        const term = filters.q.trim().replace(/[%,()]/g, " ");
         q = q.or(`title.ilike.%${term}%,description.ilike.%${term}%`);
       }
       if (filters.category !== "all") q = q.eq("category", filters.category);
       if (filters.country) q = q.eq("country_code", filters.country);
+      if (filters.regionId) q = q.eq("region_id", filters.regionId);
       if (filters.sourceIds.length) q = q.in("source_id", filters.sourceIds);
       if (filters.priceMin) q = q.gte("price_eur", Number(filters.priceMin));
       if (filters.priceMax) q = q.lte("price_eur", Number(filters.priceMax));
@@ -90,10 +90,12 @@ function FeedPage() {
         q = q.eq("city_id", filters.cityId);
       }
 
-      if (sort === "price_asc") q = q.order("price_eur", { ascending: true });
-      else if (sort === "price_desc") q = q.order("price_eur", { ascending: false });
+      if (sort === "price_desc") q = q.order("price_eur", { ascending: false });
       else if (sort === "newest") q = q.order("posted_at", { ascending: false });
-      else q = q.order("price_score", { ascending: true, nullsFirst: false });
+      else if (sort === "best_deal")
+        q = q.order("price_score", { ascending: true, nullsFirst: false });
+      else if (sort === "relevance") q = q.order("posted_at", { ascending: false });
+      else q = q.order("price_eur", { ascending: true });
 
       const from = (pageParam as number) * PAGE_SIZE;
       const { data, error } = await q.range(from, from + PAGE_SIZE - 1);
@@ -102,9 +104,50 @@ function FeedPage() {
     },
   });
 
-  const listings = (feed.data?.pages ?? []).flat();
+  const listings = useMemo(() => {
+    const all = (feed.data?.pages ?? []).flat();
+    if (sort !== "relevance") return all;
+    return [...all].sort((a, b) => relevanceScore(b, filters.q) - relevanceScore(a, filters.q));
+  }, [feed.data, sort, filters.q]);
+
+  // Echtzeit-Hintergrundsuche: neue Anzeigen sofort melden
+  useEffect(() => {
+    setLiveCount(0);
+    const channel = supabase
+      .channel("feed-live")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "listings" },
+        (payload) => {
+          const row = payload.new as { category?: string; country_code?: string };
+          if (filters.category !== "all" && row.category !== filters.category) return;
+          if (filters.country && row.country_code !== filters.country) return;
+          setLiveCount((n) => n + 1);
+        },
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [filters.category, filters.country, filters.q, filters.cityId, sort]);
 
   const applySearch = () => setFilters((f) => ({ ...f, q: queryInput }));
+
+  const saveSearch = async () => {
+    if (!user) {
+      toast.error(t("saved.needAuth"));
+      return;
+    }
+    const label = filters.q.trim() || t(`cat.${filters.category}`);
+    const { error } = await supabase.from("saved_searches").insert({
+      user_id: user.id,
+      label,
+      query: JSON.parse(JSON.stringify(filters)),
+      notify: true,
+    });
+    if (error) toast.error(error.message);
+    else toast.success(t("search.savedOk"));
+  };
 
   return (
     <AppShell>
@@ -114,19 +157,19 @@ function FeedPage() {
             {t("app.tagline")}
           </h1>
           <form
-            className="mt-7 flex flex-col gap-2 sm:flex-row"
+            className="mt-7 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto_auto]"
             onSubmit={(e) => {
               e.preventDefault();
               applySearch();
             }}
           >
-            <div className="relative flex-1">
+            <div className="relative min-w-0">
               <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={queryInput}
                 onChange={(e) => setQueryInput(e.target.value)}
                 placeholder={t("search.placeholder")}
-                className="h-12 border-transparent bg-card pl-9 text-base"
+                className="h-12 border-transparent bg-card pl-9 text-base shadow-elev-2"
                 aria-label={t("search.button")}
               />
             </div>
@@ -164,14 +207,23 @@ function FeedPage() {
       </section>
 
       <section className="mx-auto w-full max-w-6xl px-4 py-8">
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm text-muted-foreground">
-            {feed.isPending ? t("results.loading") : t("results.count", { n: listings.length })}
-          </p>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">{t("sort.label")}</span>
+        <div className="mb-5 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:flex-wrap sm:justify-between">
+          <div className="flex min-w-0 flex-col gap-1">
+            <p className="truncate text-sm text-muted-foreground">
+              {feed.isPending ? t("results.loading") : t("results.count", { n: listings.length })}
+            </p>
+            <span className="flex items-center gap-1.5 text-xs text-price-great">
+              <Radio className="size-3 animate-pulse" />
+              {t("feed.live")}
+            </span>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={saveSearch}>
+              <BellPlus className="size-4" />
+              <span className="hidden sm:inline">{t("search.save")}</span>
+            </Button>
             <Select value={sort} onValueChange={(v) => setSort(v as SortKey)}>
-              <SelectTrigger className="w-52">
+              <SelectTrigger className="w-44 sm:w-52">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -184,6 +236,19 @@ function FeedPage() {
             </Select>
           </div>
         </div>
+
+        {liveCount > 0 && (
+          <button
+            type="button"
+            onClick={() => {
+              setLiveCount(0);
+              void feed.refetch();
+            }}
+            className="mb-5 w-full rounded-xl border border-price-great/30 bg-price-great/10 px-4 py-2.5 text-sm font-medium text-price-great shadow-elev-1 transition hover:bg-price-great/15"
+          >
+            {t("feed.newResults", { n: liveCount })} · {t("feed.showNew")}
+          </button>
+        )}
 
         {feed.isPending ? (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

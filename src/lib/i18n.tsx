@@ -7,6 +7,9 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { EXTRA_DICTS } from "./i18n-extra";
+
+
 
 export type Lang = "de" | "en" | "sq";
 export const LANGS: { code: Lang; label: string }[] = [
@@ -520,7 +523,12 @@ const sq: Dict = {
   "common.error": "Diçka shkoi keq.",
 };
 
-const DICTS: Record<Lang, Dict> = { de, en, sq };
+const DICTS: Record<Lang, Dict> = {
+  de: { ...de, ...EXTRA_DICTS.de },
+  en: { ...en, ...EXTRA_DICTS.en },
+  sq: { ...sq, ...EXTRA_DICTS.sq },
+};
+
 const STORAGE_KEY = "eurodeal.lang";
 
 function detectLang(): Lang {
