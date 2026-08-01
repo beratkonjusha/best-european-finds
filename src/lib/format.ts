@@ -6,8 +6,10 @@ export type Category = (typeof CATEGORIES)[number];
 export const PRICE_BANDS = ["great", "good", "fair", "high", "check"] as const;
 export type PriceBand = (typeof PRICE_BANDS)[number];
 
-export const SORTS = ["best_deal", "newest", "price_asc", "price_desc"] as const;
+export const SORTS = ["price_asc", "best_deal", "relevance", "newest", "price_desc"] as const;
 export type SortKey = (typeof SORTS)[number];
+export const DEFAULT_SORT: SortKey = "price_asc";
+
 
 export const RADIUS_OPTIONS = [0, 10, 25, 50, 100, 250] as const;
 
