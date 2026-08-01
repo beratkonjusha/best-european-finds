@@ -7,6 +7,9 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { EXTRA_DICTS } from "./i18n-extra";
+
+
 
 export type Lang = "de" | "en" | "sq";
 export const LANGS: { code: Lang; label: string }[] = [
