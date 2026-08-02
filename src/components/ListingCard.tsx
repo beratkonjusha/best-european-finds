@@ -35,7 +35,7 @@ export function ListingCard({
 }: {
   listing: FeedListing;
   isFavorite?: boolean;
-  onToggleFavorite?: (id: string) => void;
+  onToggleFavorite?: (id: string, snapshot?: FeedListing) => void;
 }) {
   const { t, lang } = useI18n();
   const images = Array.isArray(listing.images) ? (listing.images as string[]) : [];
@@ -100,7 +100,7 @@ export function ListingCard({
         <button
           type="button"
           aria-label={t("detail.save")}
-          onClick={() => onToggleFavorite(listing.id)}
+          onClick={() => onToggleFavorite(listing.id, listing)}
           className="absolute right-3 top-3 grid size-9 place-items-center rounded-full bg-card/90 text-foreground shadow-card backdrop-blur transition-colors hover:bg-card"
         >
           <Heart className={cn("size-4", isFavorite && "fill-destructive text-destructive")} />
