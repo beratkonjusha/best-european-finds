@@ -38,7 +38,7 @@ export function NetworkBanner() {
 
   if (metered && !meteredDismissed) {
     return (
-      <div className="sticky top-14 z-30 border-b bg-warning-soft px-4 py-2 text-xs">
+      <div className="sticky top-14 z-30 border-b bg-surface px-4 py-2 text-xs">
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-2">
           <Signal className="size-3.5 shrink-0" />
           <span className="min-w-0 flex-1">{t("network.meteredDesc")}</span>
