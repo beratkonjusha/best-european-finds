@@ -14,10 +14,14 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ImprintRouteImport } from './routes/imprint'
 import { Route as InfoRouteImport } from './routes/info'
 import { Route as InviteRouteImport } from './routes/invite'
+import { Route as MonitoringRouteImport } from './routes/monitoring'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ReviewsRouteImport } from './routes/reviews'
 import { Route as SavedRouteImport } from './routes/saved'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as ListingIdRouteImport } from './routes/listing.$id'
+import { Route as ApiPublicIngestRecomputeStatsRouteImport } from './routes/api/public/ingest/recompute-stats'
+import { Route as ApiPublicIngestRunRouteImport } from './routes/api/public/ingest/run'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -44,6 +48,16 @@ const InviteRoute = InviteRouteImport.update({
   path: '/invite',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MonitoringRoute = MonitoringRouteImport.update({
+  id: '/monitoring',
+  path: '/monitoring',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReviewsRoute = ReviewsRouteImport.update({
   id: '/reviews',
   path: '/reviews',
@@ -64,6 +78,17 @@ const ListingIdRoute = ListingIdRouteImport.update({
   path: '/listing/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicIngestRecomputeStatsRoute =
+  ApiPublicIngestRecomputeStatsRouteImport.update({
+    id: '/api/public/ingest/recompute-stats',
+    path: '/api/public/ingest/recompute-stats',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicIngestRunRoute = ApiPublicIngestRunRouteImport.update({
+  id: '/api/public/ingest/run',
+  path: '/api/public/ingest/run',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -71,10 +96,14 @@ export interface FileRoutesByFullPath {
   '/imprint': typeof ImprintRoute
   '/info': typeof InfoRoute
   '/invite': typeof InviteRoute
+  '/monitoring': typeof MonitoringRoute
+  '/profile': typeof ProfileRoute
   '/reviews': typeof ReviewsRoute
   '/saved': typeof SavedRoute
   '/support': typeof SupportRoute
   '/listing/$id': typeof ListingIdRoute
+  '/api/public/ingest/recompute-stats': typeof ApiPublicIngestRecomputeStatsRoute
+  '/api/public/ingest/run': typeof ApiPublicIngestRunRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -82,10 +111,14 @@ export interface FileRoutesByTo {
   '/imprint': typeof ImprintRoute
   '/info': typeof InfoRoute
   '/invite': typeof InviteRoute
+  '/monitoring': typeof MonitoringRoute
+  '/profile': typeof ProfileRoute
   '/reviews': typeof ReviewsRoute
   '/saved': typeof SavedRoute
   '/support': typeof SupportRoute
   '/listing/$id': typeof ListingIdRoute
+  '/api/public/ingest/recompute-stats': typeof ApiPublicIngestRecomputeStatsRoute
+  '/api/public/ingest/run': typeof ApiPublicIngestRunRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -94,10 +127,14 @@ export interface FileRoutesById {
   '/imprint': typeof ImprintRoute
   '/info': typeof InfoRoute
   '/invite': typeof InviteRoute
+  '/monitoring': typeof MonitoringRoute
+  '/profile': typeof ProfileRoute
   '/reviews': typeof ReviewsRoute
   '/saved': typeof SavedRoute
   '/support': typeof SupportRoute
   '/listing/$id': typeof ListingIdRoute
+  '/api/public/ingest/recompute-stats': typeof ApiPublicIngestRecomputeStatsRoute
+  '/api/public/ingest/run': typeof ApiPublicIngestRunRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -107,10 +144,14 @@ export interface FileRouteTypes {
     | '/imprint'
     | '/info'
     | '/invite'
+    | '/monitoring'
+    | '/profile'
     | '/reviews'
     | '/saved'
     | '/support'
     | '/listing/$id'
+    | '/api/public/ingest/recompute-stats'
+    | '/api/public/ingest/run'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -118,10 +159,14 @@ export interface FileRouteTypes {
     | '/imprint'
     | '/info'
     | '/invite'
+    | '/monitoring'
+    | '/profile'
     | '/reviews'
     | '/saved'
     | '/support'
     | '/listing/$id'
+    | '/api/public/ingest/recompute-stats'
+    | '/api/public/ingest/run'
   id:
     | '__root__'
     | '/'
@@ -129,10 +174,14 @@ export interface FileRouteTypes {
     | '/imprint'
     | '/info'
     | '/invite'
+    | '/monitoring'
+    | '/profile'
     | '/reviews'
     | '/saved'
     | '/support'
     | '/listing/$id'
+    | '/api/public/ingest/recompute-stats'
+    | '/api/public/ingest/run'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -141,10 +190,14 @@ export interface RootRouteChildren {
   ImprintRoute: typeof ImprintRoute
   InfoRoute: typeof InfoRoute
   InviteRoute: typeof InviteRoute
+  MonitoringRoute: typeof MonitoringRoute
+  ProfileRoute: typeof ProfileRoute
   ReviewsRoute: typeof ReviewsRoute
   SavedRoute: typeof SavedRoute
   SupportRoute: typeof SupportRoute
   ListingIdRoute: typeof ListingIdRoute
+  ApiPublicIngestRecomputeStatsRoute: typeof ApiPublicIngestRecomputeStatsRoute
+  ApiPublicIngestRunRoute: typeof ApiPublicIngestRunRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -184,6 +237,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InviteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/monitoring': {
+      id: '/monitoring'
+      path: '/monitoring'
+      fullPath: '/monitoring'
+      preLoaderRoute: typeof MonitoringRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reviews': {
       id: '/reviews'
       path: '/reviews'
@@ -212,6 +279,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ListingIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/ingest/recompute-stats': {
+      id: '/api/public/ingest/recompute-stats'
+      path: '/api/public/ingest/recompute-stats'
+      fullPath: '/api/public/ingest/recompute-stats'
+      preLoaderRoute: typeof ApiPublicIngestRecomputeStatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/ingest/run': {
+      id: '/api/public/ingest/run'
+      path: '/api/public/ingest/run'
+      fullPath: '/api/public/ingest/run'
+      preLoaderRoute: typeof ApiPublicIngestRunRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -221,10 +302,14 @@ const rootRouteChildren: RootRouteChildren = {
   ImprintRoute: ImprintRoute,
   InfoRoute: InfoRoute,
   InviteRoute: InviteRoute,
+  MonitoringRoute: MonitoringRoute,
+  ProfileRoute: ProfileRoute,
   ReviewsRoute: ReviewsRoute,
   SavedRoute: SavedRoute,
   SupportRoute: SupportRoute,
   ListingIdRoute: ListingIdRoute,
+  ApiPublicIngestRecomputeStatsRoute: ApiPublicIngestRecomputeStatsRoute,
+  ApiPublicIngestRunRoute: ApiPublicIngestRunRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

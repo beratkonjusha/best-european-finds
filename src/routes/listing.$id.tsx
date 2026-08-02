@@ -7,6 +7,7 @@ import { PriceBadge } from "@/components/PriceBadge";
 import { getListingDetail } from "@/lib/listings.functions";
 import { useI18n } from "@/lib/i18n";
 import { useFavorites } from "@/hooks/useFavorites";
+import { useListingTranslation } from "@/hooks/useListingTranslation";
 import {
   formatAttribute,
   formatDate,
@@ -59,6 +60,10 @@ function ListingDetail() {
   const { t, lang } = useI18n();
   const { isFavorite, toggle } = useFavorites();
   const [active, setActive] = useState(0);
+  const tr = useListingTranslation(listing.id, listing.source_lang, {
+    title: listing.title,
+    description: listing.description,
+  });
 
   const images = Array.isArray(listing.images) ? (listing.images as string[]) : [];
   const attrs = (listing.attributes ?? {}) as Attributes;
@@ -119,11 +124,11 @@ function ListingDetail() {
             )}
           </div>
 
-          {listing.description && (
+          {tr.description && (
             <section className="mt-8">
               <h2 className="font-display text-lg font-semibold">{t("detail.description")}</h2>
               <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
-                {listing.description}
+                {tr.description}
               </p>
             </section>
           )}
@@ -139,7 +144,7 @@ function ListingDetail() {
             <p className="mt-3 font-display text-3xl font-bold">
               {formatPrice(listing.price_eur, lang)}
             </p>
-            <h1 className="mt-2 text-base font-medium leading-snug">{listing.title}</h1>
+            <h1 className="mt-2 text-base font-medium leading-snug">{tr.title}</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               {listing.cities?.name ? `${listing.cities.name}, ` : ""}
               {listing.countries
@@ -158,7 +163,7 @@ function ListingDetail() {
                   {t("detail.original")}
                 </a>
               </Button>
-              <Button variant="outline" size="icon" onClick={() => toggle(listing.id)}>
+              <Button variant="outline" size="icon" onClick={() => toggle(listing.id, listing as never)}>
                 <Heart className={cn("size-4", fav && "fill-destructive text-destructive")} />
                 <span className="sr-only">{t(fav ? "detail.saved" : "detail.save")}</span>
               </Button>

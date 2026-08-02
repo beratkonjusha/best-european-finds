@@ -21,7 +21,7 @@ export function createPublicSupabase() {
 }
 
 export const LISTING_SELECT =
-  "id,title,description,price_eur,currency,category,country_code,city_id,lat,lng,images,attributes,url,posted_at,price_band,price_score,segment_key,source_id,sources(name,base_url),cities(name),countries(name_de,name_en,name_sq)";
+  "id,title,description,price_eur,currency,category,country_code,city_id,lat,lng,images,attributes,url,posted_at,price_band,price_score,segment_key,source_lang,source_id,sources(name,base_url),cities(name),countries(name_de,name_en,name_sq)";
 
 export async function fetchListingDetail(id: string) {
   const supabase = createPublicSupabase();
