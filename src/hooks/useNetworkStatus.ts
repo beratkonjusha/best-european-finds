@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 
-type Conn = { effectiveType?: string; saveData?: boolean; type?: string };
+type Conn = {
+  effectiveType?: string;
+  saveData?: boolean;
+  type?: string;
+  addEventListener?: (t: string, cb: () => void) => void;
+  removeEventListener?: (t: string, cb: () => void) => void;
+};
 
 export function useNetworkStatus() {
   const [online, setOnline] = useState(true);
