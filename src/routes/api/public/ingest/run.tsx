@@ -107,7 +107,7 @@ export const Route = createFileRoute("/api/public/ingest/run")({
               fetched_at: new Date().toISOString(),
               last_seen_at: new Date().toISOString(),
               active: true,
-            };
+            });
           }
           const { error, count } = await supabaseAdmin
             .from("listings")
