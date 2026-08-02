@@ -14,6 +14,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ImprintRouteImport } from './routes/imprint'
 import { Route as InfoRouteImport } from './routes/info'
 import { Route as InviteRouteImport } from './routes/invite'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ReviewsRouteImport } from './routes/reviews'
 import { Route as SavedRouteImport } from './routes/saved'
 import { Route as SupportRouteImport } from './routes/support'
@@ -44,6 +45,11 @@ const InviteRoute = InviteRouteImport.update({
   path: '/invite',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReviewsRoute = ReviewsRouteImport.update({
   id: '/reviews',
   path: '/reviews',
@@ -71,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/imprint': typeof ImprintRoute
   '/info': typeof InfoRoute
   '/invite': typeof InviteRoute
+  '/profile': typeof ProfileRoute
   '/reviews': typeof ReviewsRoute
   '/saved': typeof SavedRoute
   '/support': typeof SupportRoute
@@ -82,6 +89,7 @@ export interface FileRoutesByTo {
   '/imprint': typeof ImprintRoute
   '/info': typeof InfoRoute
   '/invite': typeof InviteRoute
+  '/profile': typeof ProfileRoute
   '/reviews': typeof ReviewsRoute
   '/saved': typeof SavedRoute
   '/support': typeof SupportRoute
@@ -94,6 +102,7 @@ export interface FileRoutesById {
   '/imprint': typeof ImprintRoute
   '/info': typeof InfoRoute
   '/invite': typeof InviteRoute
+  '/profile': typeof ProfileRoute
   '/reviews': typeof ReviewsRoute
   '/saved': typeof SavedRoute
   '/support': typeof SupportRoute
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
     | '/imprint'
     | '/info'
     | '/invite'
+    | '/profile'
     | '/reviews'
     | '/saved'
     | '/support'
@@ -118,6 +128,7 @@ export interface FileRouteTypes {
     | '/imprint'
     | '/info'
     | '/invite'
+    | '/profile'
     | '/reviews'
     | '/saved'
     | '/support'
@@ -129,6 +140,7 @@ export interface FileRouteTypes {
     | '/imprint'
     | '/info'
     | '/invite'
+    | '/profile'
     | '/reviews'
     | '/saved'
     | '/support'
@@ -141,6 +153,7 @@ export interface RootRouteChildren {
   ImprintRoute: typeof ImprintRoute
   InfoRoute: typeof InfoRoute
   InviteRoute: typeof InviteRoute
+  ProfileRoute: typeof ProfileRoute
   ReviewsRoute: typeof ReviewsRoute
   SavedRoute: typeof SavedRoute
   SupportRoute: typeof SupportRoute
@@ -184,6 +197,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InviteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reviews': {
       id: '/reviews'
       path: '/reviews'
@@ -221,6 +241,7 @@ const rootRouteChildren: RootRouteChildren = {
   ImprintRoute: ImprintRoute,
   InfoRoute: InfoRoute,
   InviteRoute: InviteRoute,
+  ProfileRoute: ProfileRoute,
   ReviewsRoute: ReviewsRoute,
   SavedRoute: SavedRoute,
   SupportRoute: SupportRoute,
