@@ -14,6 +14,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ImprintRouteImport } from './routes/imprint'
 import { Route as InfoRouteImport } from './routes/info'
 import { Route as InviteRouteImport } from './routes/invite'
+import { Route as MonitoringRouteImport } from './routes/monitoring'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ReviewsRouteImport } from './routes/reviews'
 import { Route as SavedRouteImport } from './routes/saved'
@@ -43,6 +44,11 @@ const InfoRoute = InfoRouteImport.update({
 const InviteRoute = InviteRouteImport.update({
   id: '/invite',
   path: '/invite',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MonitoringRoute = MonitoringRouteImport.update({
+  id: '/monitoring',
+  path: '/monitoring',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfileRoute = ProfileRouteImport.update({
@@ -77,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/imprint': typeof ImprintRoute
   '/info': typeof InfoRoute
   '/invite': typeof InviteRoute
+  '/monitoring': typeof MonitoringRoute
   '/profile': typeof ProfileRoute
   '/reviews': typeof ReviewsRoute
   '/saved': typeof SavedRoute
@@ -89,6 +96,7 @@ export interface FileRoutesByTo {
   '/imprint': typeof ImprintRoute
   '/info': typeof InfoRoute
   '/invite': typeof InviteRoute
+  '/monitoring': typeof MonitoringRoute
   '/profile': typeof ProfileRoute
   '/reviews': typeof ReviewsRoute
   '/saved': typeof SavedRoute
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/imprint': typeof ImprintRoute
   '/info': typeof InfoRoute
   '/invite': typeof InviteRoute
+  '/monitoring': typeof MonitoringRoute
   '/profile': typeof ProfileRoute
   '/reviews': typeof ReviewsRoute
   '/saved': typeof SavedRoute
@@ -116,6 +125,7 @@ export interface FileRouteTypes {
     | '/imprint'
     | '/info'
     | '/invite'
+    | '/monitoring'
     | '/profile'
     | '/reviews'
     | '/saved'
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/imprint'
     | '/info'
     | '/invite'
+    | '/monitoring'
     | '/profile'
     | '/reviews'
     | '/saved'
@@ -140,6 +151,7 @@ export interface FileRouteTypes {
     | '/imprint'
     | '/info'
     | '/invite'
+    | '/monitoring'
     | '/profile'
     | '/reviews'
     | '/saved'
@@ -153,6 +165,7 @@ export interface RootRouteChildren {
   ImprintRoute: typeof ImprintRoute
   InfoRoute: typeof InfoRoute
   InviteRoute: typeof InviteRoute
+  MonitoringRoute: typeof MonitoringRoute
   ProfileRoute: typeof ProfileRoute
   ReviewsRoute: typeof ReviewsRoute
   SavedRoute: typeof SavedRoute
@@ -195,6 +208,13 @@ declare module '@tanstack/react-router' {
       path: '/invite'
       fullPath: '/invite'
       preLoaderRoute: typeof InviteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/monitoring': {
+      id: '/monitoring'
+      path: '/monitoring'
+      fullPath: '/monitoring'
+      preLoaderRoute: typeof MonitoringRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profile': {
@@ -241,6 +261,7 @@ const rootRouteChildren: RootRouteChildren = {
   ImprintRoute: ImprintRoute,
   InfoRoute: InfoRoute,
   InviteRoute: InviteRoute,
+  MonitoringRoute: MonitoringRoute,
   ProfileRoute: ProfileRoute,
   ReviewsRoute: ReviewsRoute,
   SavedRoute: SavedRoute,
