@@ -16,6 +16,7 @@ import { Route as InfoRouteImport } from './routes/info'
 import { Route as InviteRouteImport } from './routes/invite'
 import { Route as MonitoringRouteImport } from './routes/monitoring'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ReviewsRouteImport } from './routes/reviews'
 import { Route as SavedRouteImport } from './routes/saved'
 import { Route as SupportRouteImport } from './routes/support'
@@ -58,6 +59,11 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReviewsRoute = ReviewsRouteImport.update({
   id: '/reviews',
   path: '/reviews',
@@ -98,6 +104,7 @@ export interface FileRoutesByFullPath {
   '/invite': typeof InviteRoute
   '/monitoring': typeof MonitoringRoute
   '/profile': typeof ProfileRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/reviews': typeof ReviewsRoute
   '/saved': typeof SavedRoute
   '/support': typeof SupportRoute
@@ -113,6 +120,7 @@ export interface FileRoutesByTo {
   '/invite': typeof InviteRoute
   '/monitoring': typeof MonitoringRoute
   '/profile': typeof ProfileRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/reviews': typeof ReviewsRoute
   '/saved': typeof SavedRoute
   '/support': typeof SupportRoute
@@ -129,6 +137,7 @@ export interface FileRoutesById {
   '/invite': typeof InviteRoute
   '/monitoring': typeof MonitoringRoute
   '/profile': typeof ProfileRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/reviews': typeof ReviewsRoute
   '/saved': typeof SavedRoute
   '/support': typeof SupportRoute
@@ -146,6 +155,7 @@ export interface FileRouteTypes {
     | '/invite'
     | '/monitoring'
     | '/profile'
+    | '/reset-password'
     | '/reviews'
     | '/saved'
     | '/support'
@@ -161,6 +171,7 @@ export interface FileRouteTypes {
     | '/invite'
     | '/monitoring'
     | '/profile'
+    | '/reset-password'
     | '/reviews'
     | '/saved'
     | '/support'
@@ -176,6 +187,7 @@ export interface FileRouteTypes {
     | '/invite'
     | '/monitoring'
     | '/profile'
+    | '/reset-password'
     | '/reviews'
     | '/saved'
     | '/support'
@@ -192,6 +204,7 @@ export interface RootRouteChildren {
   InviteRoute: typeof InviteRoute
   MonitoringRoute: typeof MonitoringRoute
   ProfileRoute: typeof ProfileRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   ReviewsRoute: typeof ReviewsRoute
   SavedRoute: typeof SavedRoute
   SupportRoute: typeof SupportRoute
@@ -251,6 +264,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reviews': {
       id: '/reviews'
       path: '/reviews'
@@ -304,6 +324,7 @@ const rootRouteChildren: RootRouteChildren = {
   InviteRoute: InviteRoute,
   MonitoringRoute: MonitoringRoute,
   ProfileRoute: ProfileRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   ReviewsRoute: ReviewsRoute,
   SavedRoute: SavedRoute,
   SupportRoute: SupportRoute,
