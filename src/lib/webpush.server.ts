@@ -5,6 +5,9 @@
 
 const enc = new TextEncoder();
 
+/** WebCrypto-Typen erwarten ArrayBuffer-basierte Views. */
+const bs = (u: Uint8Array): BufferSource => u as unknown as BufferSource;
+
 function b64urlToBytes(input: string): Uint8Array {
   const pad = input.replace(/-/g, "+").replace(/_/g, "/");
   const bin = atob(pad + "=".repeat((4 - (pad.length % 4)) % 4));
@@ -31,10 +34,10 @@ function concat(...parts: Uint8Array[]): Uint8Array {
 }
 
 async function hmac(key: Uint8Array, data: Uint8Array): Promise<Uint8Array> {
-  const k = await crypto.subtle.importKey("raw", key, { name: "HMAC", hash: "SHA-256" }, false, [
+  const k = await crypto.subtle.importKey("raw", bs(key), { name: "HMAC", hash: "SHA-256" }, false, [
     "sign",
   ]);
-  return new Uint8Array(await crypto.subtle.sign("HMAC", k, data));
+  return new Uint8Array(await crypto.subtle.sign("HMAC", k, bs(data)));
 }
 
 async function importVapidPrivateKey(privateD: string, publicRaw: Uint8Array) {
@@ -82,7 +85,7 @@ async function encryptPayload(
   const asPublicRaw = new Uint8Array(await crypto.subtle.exportKey("raw", asKeys.publicKey));
   const uaKey = await crypto.subtle.importKey(
     "raw",
-    uaPublicRaw,
+    bs(uaPublicRaw),
     { name: "ECDH", namedCurve: "P-256" },
     false,
     [],
@@ -98,10 +101,10 @@ async function encryptPayload(
   const cek = (await hmac(prk, concat(enc.encode("Content-Encoding: aes128gcm\0"), new Uint8Array([1])))).slice(0, 16);
   const nonce = (await hmac(prk, concat(enc.encode("Content-Encoding: nonce\0"), new Uint8Array([1])))).slice(0, 12);
 
-  const aesKey = await crypto.subtle.importKey("raw", cek, { name: "AES-GCM" }, false, ["encrypt"]);
+  const aesKey = await crypto.subtle.importKey("raw", bs(cek), { name: "AES-GCM" }, false, ["encrypt"]);
   const record = concat(enc.encode(payload), new Uint8Array([2]));
   const ciphertext = new Uint8Array(
-    await crypto.subtle.encrypt({ name: "AES-GCM", iv: nonce }, aesKey, record),
+    await crypto.subtle.encrypt({ name: "AES-GCM", iv: bs(nonce) }, aesKey, bs(record)),
   );
 
   const rs = new Uint8Array(4);
