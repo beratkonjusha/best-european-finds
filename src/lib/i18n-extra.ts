@@ -3,6 +3,28 @@ import type { Lang } from "./i18n";
 type Dict = Record<string, string>;
 
 const de: Dict = {
+  "auth.google": "Mit Google fortfahren",
+  "auth.or": "oder mit E-Mail",
+  "auth.forgot": "Passwort vergessen?",
+  "auth.resetSent": "Wir haben dir einen Link zum Zurücksetzen geschickt.",
+  "auth.resetTitle": "Neues Passwort setzen",
+  "auth.newPassword": "Neues Passwort",
+  "auth.resetDone": "Passwort geändert. Du bist angemeldet.",
+  "auth.weakPassword":
+    "Dieses Passwort gilt als unsicher. Bitte wähle ein längeres, einzigartiges Passwort.",
+  "auth.invalid": "E-Mail oder Passwort stimmt nicht.",
+  "auth.created": "Konto erstellt. Willkommen!",
+  "auth.needEmail": "Bitte gib zuerst deine E-Mail-Adresse ein.",
+  "push.title": "Push-Benachrichtigungen",
+  "push.enable": "Benachrichtigungen aktivieren",
+  "push.disable": "Benachrichtigungen deaktivieren",
+  "push.enabled": "Benachrichtigungen aktiv auf diesem Gerät",
+  "push.blocked": "Benachrichtigungen sind im Browser blockiert.",
+  "push.unsupported": "Dieses Gerät unterstützt keine Push-Benachrichtigungen.",
+  "push.throttle": "Frühestens alle",
+  "push.minutes": "Minuten",
+  "push.test": "Testbenachrichtigung senden",
+  "push.sent": "Benachrichtigung gesendet.",
   "filters.region": "Bundesland / Region",
   "filters.anyRegion": "Alle Regionen",
   "filters.citySearch": "Stadt oder Postleitzahl …",
