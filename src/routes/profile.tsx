@@ -120,8 +120,12 @@ function ProfilePage() {
   }, [profile.data, lang]);
 
   useEffect(() => {
-    if (typeof Notification !== "undefined") setPushOn(Notification.permission === "granted");
-  }, []);
+    void (async () => {
+      if (!user) return;
+      const sub = await currentSubscription();
+      setPushOn(Boolean(sub) && (await pushEnabledForUser(user.id)));
+    })();
+  }, [user]);
 
   async function save() {
     if (!user) return;
@@ -139,32 +143,41 @@ function ProfilePage() {
     void qc.invalidateQueries({ queryKey: ["profile", user.id] });
   }
 
-  async function enablePush() {
-    if (typeof Notification === "undefined") return;
-    const perm = await Notification.requestPermission();
-    if (perm !== "granted") {
-      toast.error(t("profile.pushBlocked"));
+  async function togglePush(next: boolean) {
+    if (!user) return;
+    if (!next) {
+      const endpoint = await unsubscribeFromPush();
+      if (endpoint) await removeSub({ data: { endpoint } });
+      setPushOn(false);
       return;
     }
-    setPushOn(true);
-    try {
-      const reg = await navigator.serviceWorker?.ready;
-      const sub = await reg?.pushManager.getSubscription();
-      if (sub && user) {
-        const json = sub.toJSON();
-        await supabase.from("push_subscriptions").upsert(
-          {
-            user_id: user.id,
-            endpoint: sub.endpoint,
-            keys: (json.keys ?? {}) as never,
-          },
-          { onConflict: "user_id,endpoint" },
-        );
-      }
-    } catch {
-      /* Push nur in installierter App verfügbar */
+    if (!pushSupported()) {
+      toast.error(t("push.unsupported"));
+      return;
     }
-    toast.success(t("profile.pushEnabled"));
+    const res = await subscribeToPush();
+    if (res.status === "denied") {
+      toast.error(t("push.blocked"));
+      return;
+    }
+    if (res.status !== "ok") {
+      toast.error(t("push.unsupported"));
+      return;
+    }
+    try {
+      await saveSub({
+        data: {
+          endpoint: res.endpoint,
+          p256dh: res.p256dh,
+          auth: res.auth,
+          userAgent: navigator.userAgent.slice(0, 400),
+        },
+      });
+      setPushOn(true);
+      toast.success(t("profile.pushEnabled"));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t("common.error"));
+    }
   }
 
   if (loading || !user) {
