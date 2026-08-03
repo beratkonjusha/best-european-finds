@@ -341,12 +341,53 @@ export type Database = {
         }
         Relationships: []
       }
+      push_deliveries: {
+        Row: {
+          created_at: string
+          id: string
+          listing_id: string
+          saved_search_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          listing_id: string
+          saved_search_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          listing_id?: string
+          saved_search_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_deliveries_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "push_deliveries_saved_search_id_fkey"
+            columns: ["saved_search_id"]
+            isOneToOne: false
+            referencedRelation: "saved_searches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       push_subscriptions: {
         Row: {
           created_at: string
           endpoint: string
           id: string
           keys: Json
+          last_success_at: string | null
+          user_agent: string | null
           user_id: string
         }
         Insert: {
@@ -354,6 +395,8 @@ export type Database = {
           endpoint: string
           id?: string
           keys?: Json
+          last_success_at?: string | null
+          user_agent?: string | null
           user_id: string
         }
         Update: {
@@ -361,6 +404,8 @@ export type Database = {
           endpoint?: string
           id?: string
           keys?: Json
+          last_success_at?: string | null
+          user_agent?: string | null
           user_id?: string
         }
         Relationships: []
@@ -434,8 +479,10 @@ export type Database = {
           label: string
           last_checked_at: string | null
           last_notified_at: string | null
+          last_notified_listing_at: string | null
           notify: boolean
           query: Json
+          throttle_minutes: number
           user_id: string
         }
         Insert: {
@@ -444,8 +491,10 @@ export type Database = {
           label: string
           last_checked_at?: string | null
           last_notified_at?: string | null
+          last_notified_listing_at?: string | null
           notify?: boolean
           query?: Json
+          throttle_minutes?: number
           user_id: string
         }
         Update: {
@@ -454,8 +503,10 @@ export type Database = {
           label?: string
           last_checked_at?: string | null
           last_notified_at?: string | null
+          last_notified_listing_at?: string | null
           notify?: boolean
           query?: Json
+          throttle_minutes?: number
           user_id?: string
         }
         Relationships: []
