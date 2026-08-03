@@ -5,7 +5,20 @@ import { toast } from "sonner";
 import { Bell, Trash2 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/useAuth";
+import {
+  currentSubscription,
+  pushEnabledForUser,
+  pushSupported,
+  subscribeToPush,
+  unsubscribeFromPush,
+} from "@/lib/push";
+import {
+  removePushSubscription,
+  savePushSubscription,
+  sendTestPush,
+} from "@/lib/push.functions";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useI18n, LANGS, type Lang } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
@@ -72,6 +85,9 @@ function ProfilePage() {
   const [form, setForm] = useState<ProfileForm>(EMPTY);
   const [saving, setSaving] = useState(false);
   const [pushOn, setPushOn] = useState(false);
+  const saveSub = useServerFn(savePushSubscription);
+  const removeSub = useServerFn(removePushSubscription);
+  const testPush = useServerFn(sendTestPush);
 
   useEffect(() => {
     if (!loading && !user) void navigate({ to: "/auth" });
@@ -120,8 +136,12 @@ function ProfilePage() {
   }, [profile.data, lang]);
 
   useEffect(() => {
-    if (typeof Notification !== "undefined") setPushOn(Notification.permission === "granted");
-  }, []);
+    void (async () => {
+      if (!user) return;
+      const sub = await currentSubscription();
+      setPushOn(Boolean(sub) && (await pushEnabledForUser(user.id)));
+    })();
+  }, [user]);
 
   async function save() {
     if (!user) return;
@@ -139,32 +159,41 @@ function ProfilePage() {
     void qc.invalidateQueries({ queryKey: ["profile", user.id] });
   }
 
-  async function enablePush() {
-    if (typeof Notification === "undefined") return;
-    const perm = await Notification.requestPermission();
-    if (perm !== "granted") {
-      toast.error(t("profile.pushBlocked"));
+  async function togglePush(next: boolean) {
+    if (!user) return;
+    if (!next) {
+      const endpoint = await unsubscribeFromPush();
+      if (endpoint) await removeSub({ data: { endpoint } });
+      setPushOn(false);
       return;
     }
-    setPushOn(true);
-    try {
-      const reg = await navigator.serviceWorker?.ready;
-      const sub = await reg?.pushManager.getSubscription();
-      if (sub && user) {
-        const json = sub.toJSON();
-        await supabase.from("push_subscriptions").upsert(
-          {
-            user_id: user.id,
-            endpoint: sub.endpoint,
-            keys: (json.keys ?? {}) as never,
-          },
-          { onConflict: "user_id,endpoint" },
-        );
-      }
-    } catch {
-      /* Push nur in installierter App verfügbar */
+    if (!pushSupported()) {
+      toast.error(t("push.unsupported"));
+      return;
     }
-    toast.success(t("profile.pushEnabled"));
+    const res = await subscribeToPush();
+    if (res.status === "denied") {
+      toast.error(t("push.blocked"));
+      return;
+    }
+    if (res.status !== "ok") {
+      toast.error(t("push.unsupported"));
+      return;
+    }
+    try {
+      await saveSub({
+        data: {
+          endpoint: res.endpoint,
+          p256dh: res.p256dh,
+          auth: res.auth,
+          userAgent: navigator.userAgent.slice(0, 400),
+        },
+      });
+      setPushOn(true);
+      toast.success(t("profile.pushEnabled"));
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t("common.error"));
+    }
   }
 
   if (loading || !user) {
@@ -283,11 +312,28 @@ function ProfilePage() {
             <Switch
               checked={pushOn}
               onCheckedChange={(v) => {
-                if (v) void enablePush();
-                else setPushOn(false);
+                void togglePush(v);
               }}
             />
           </div>
+
+          {pushOn && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-fit"
+              onClick={async () => {
+                try {
+                  const res = await testPush({});
+                  toast.success(res.sent > 0 ? t("push.testSent") : t("push.testNone"));
+                } catch {
+                  toast.error(t("common.error"));
+                }
+              }}
+            >
+              {t("push.test")}
+            </Button>
+          )}
 
           <div className="mt-2">
             <p className="mb-2 flex items-center gap-1.5 text-sm font-medium">

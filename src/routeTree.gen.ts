@@ -16,12 +16,14 @@ import { Route as InfoRouteImport } from './routes/info'
 import { Route as InviteRouteImport } from './routes/invite'
 import { Route as MonitoringRouteImport } from './routes/monitoring'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ReviewsRouteImport } from './routes/reviews'
 import { Route as SavedRouteImport } from './routes/saved'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as ListingIdRouteImport } from './routes/listing.$id'
 import { Route as ApiPublicIngestRecomputeStatsRouteImport } from './routes/api/public/ingest/recompute-stats'
 import { Route as ApiPublicIngestRunRouteImport } from './routes/api/public/ingest/run'
+import { Route as ApiPublicPushDispatchRouteImport } from './routes/api/public/push/dispatch'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -58,6 +60,11 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReviewsRoute = ReviewsRouteImport.update({
   id: '/reviews',
   path: '/reviews',
@@ -89,6 +96,11 @@ const ApiPublicIngestRunRoute = ApiPublicIngestRunRouteImport.update({
   path: '/api/public/ingest/run',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicPushDispatchRoute = ApiPublicPushDispatchRouteImport.update({
+  id: '/api/public/push/dispatch',
+  path: '/api/public/push/dispatch',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -98,12 +110,14 @@ export interface FileRoutesByFullPath {
   '/invite': typeof InviteRoute
   '/monitoring': typeof MonitoringRoute
   '/profile': typeof ProfileRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/reviews': typeof ReviewsRoute
   '/saved': typeof SavedRoute
   '/support': typeof SupportRoute
   '/listing/$id': typeof ListingIdRoute
   '/api/public/ingest/recompute-stats': typeof ApiPublicIngestRecomputeStatsRoute
   '/api/public/ingest/run': typeof ApiPublicIngestRunRoute
+  '/api/public/push/dispatch': typeof ApiPublicPushDispatchRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -113,12 +127,14 @@ export interface FileRoutesByTo {
   '/invite': typeof InviteRoute
   '/monitoring': typeof MonitoringRoute
   '/profile': typeof ProfileRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/reviews': typeof ReviewsRoute
   '/saved': typeof SavedRoute
   '/support': typeof SupportRoute
   '/listing/$id': typeof ListingIdRoute
   '/api/public/ingest/recompute-stats': typeof ApiPublicIngestRecomputeStatsRoute
   '/api/public/ingest/run': typeof ApiPublicIngestRunRoute
+  '/api/public/push/dispatch': typeof ApiPublicPushDispatchRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -129,12 +145,14 @@ export interface FileRoutesById {
   '/invite': typeof InviteRoute
   '/monitoring': typeof MonitoringRoute
   '/profile': typeof ProfileRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/reviews': typeof ReviewsRoute
   '/saved': typeof SavedRoute
   '/support': typeof SupportRoute
   '/listing/$id': typeof ListingIdRoute
   '/api/public/ingest/recompute-stats': typeof ApiPublicIngestRecomputeStatsRoute
   '/api/public/ingest/run': typeof ApiPublicIngestRunRoute
+  '/api/public/push/dispatch': typeof ApiPublicPushDispatchRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -146,12 +164,14 @@ export interface FileRouteTypes {
     | '/invite'
     | '/monitoring'
     | '/profile'
+    | '/reset-password'
     | '/reviews'
     | '/saved'
     | '/support'
     | '/listing/$id'
     | '/api/public/ingest/recompute-stats'
     | '/api/public/ingest/run'
+    | '/api/public/push/dispatch'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -161,12 +181,14 @@ export interface FileRouteTypes {
     | '/invite'
     | '/monitoring'
     | '/profile'
+    | '/reset-password'
     | '/reviews'
     | '/saved'
     | '/support'
     | '/listing/$id'
     | '/api/public/ingest/recompute-stats'
     | '/api/public/ingest/run'
+    | '/api/public/push/dispatch'
   id:
     | '__root__'
     | '/'
@@ -176,12 +198,14 @@ export interface FileRouteTypes {
     | '/invite'
     | '/monitoring'
     | '/profile'
+    | '/reset-password'
     | '/reviews'
     | '/saved'
     | '/support'
     | '/listing/$id'
     | '/api/public/ingest/recompute-stats'
     | '/api/public/ingest/run'
+    | '/api/public/push/dispatch'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -192,12 +216,14 @@ export interface RootRouteChildren {
   InviteRoute: typeof InviteRoute
   MonitoringRoute: typeof MonitoringRoute
   ProfileRoute: typeof ProfileRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   ReviewsRoute: typeof ReviewsRoute
   SavedRoute: typeof SavedRoute
   SupportRoute: typeof SupportRoute
   ListingIdRoute: typeof ListingIdRoute
   ApiPublicIngestRecomputeStatsRoute: typeof ApiPublicIngestRecomputeStatsRoute
   ApiPublicIngestRunRoute: typeof ApiPublicIngestRunRoute
+  ApiPublicPushDispatchRoute: typeof ApiPublicPushDispatchRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -251,6 +277,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reviews': {
       id: '/reviews'
       path: '/reviews'
@@ -293,6 +326,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicIngestRunRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/push/dispatch': {
+      id: '/api/public/push/dispatch'
+      path: '/api/public/push/dispatch'
+      fullPath: '/api/public/push/dispatch'
+      preLoaderRoute: typeof ApiPublicPushDispatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -304,12 +344,14 @@ const rootRouteChildren: RootRouteChildren = {
   InviteRoute: InviteRoute,
   MonitoringRoute: MonitoringRoute,
   ProfileRoute: ProfileRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   ReviewsRoute: ReviewsRoute,
   SavedRoute: SavedRoute,
   SupportRoute: SupportRoute,
   ListingIdRoute: ListingIdRoute,
   ApiPublicIngestRecomputeStatsRoute: ApiPublicIngestRecomputeStatsRoute,
   ApiPublicIngestRunRoute: ApiPublicIngestRunRoute,
+  ApiPublicPushDispatchRoute: ApiPublicPushDispatchRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
