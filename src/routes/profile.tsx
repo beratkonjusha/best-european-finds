@@ -5,7 +5,20 @@ import { toast } from "sonner";
 import { Bell, Trash2 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/hooks/useAuth";
+import {
+  currentSubscription,
+  pushEnabledForUser,
+  pushSupported,
+  subscribeToPush,
+  unsubscribeFromPush,
+} from "@/lib/push";
+import {
+  removePushSubscription,
+  savePushSubscription,
+  sendTestPush,
+} from "@/lib/push.functions";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useI18n, LANGS, type Lang } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
@@ -72,6 +85,9 @@ function ProfilePage() {
   const [form, setForm] = useState<ProfileForm>(EMPTY);
   const [saving, setSaving] = useState(false);
   const [pushOn, setPushOn] = useState(false);
+  const saveSub = useServerFn(savePushSubscription);
+  const removeSub = useServerFn(removePushSubscription);
+  const testPush = useServerFn(sendTestPush);
 
   useEffect(() => {
     if (!loading && !user) void navigate({ to: "/auth" });
@@ -296,8 +312,7 @@ function ProfilePage() {
             <Switch
               checked={pushOn}
               onCheckedChange={(v) => {
-                if (v) void enablePush();
-                else setPushOn(false);
+                void togglePush(v);
               }}
             />
           </div>
