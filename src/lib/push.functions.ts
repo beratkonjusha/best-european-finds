@@ -90,9 +90,9 @@ export const updateSearchNotify = createServerFn({ method: "POST" })
       .parse(data),
   )
   .handler(async ({ data, context }) => {
-    const patch: Record<string, unknown> = {};
-    if (data.notify !== undefined) patch["notify"] = data.notify;
-    if (data.throttleMinutes !== undefined) patch["throttle_minutes"] = data.throttleMinutes;
+    const patch: { notify?: boolean; throttle_minutes?: number } = {};
+    if (data.notify !== undefined) patch.notify = data.notify;
+    if (data.throttleMinutes !== undefined) patch.throttle_minutes = data.throttleMinutes;
     const { error } = await context.supabase
       .from("saved_searches")
       .update(patch)
