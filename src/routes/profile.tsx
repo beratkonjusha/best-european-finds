@@ -317,6 +317,24 @@ function ProfilePage() {
             />
           </div>
 
+          {pushOn && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-fit"
+              onClick={async () => {
+                try {
+                  const res = await testPush({});
+                  toast.success(res.sent > 0 ? t("push.testSent") : t("push.testNone"));
+                } catch {
+                  toast.error(t("common.error"));
+                }
+              }}
+            >
+              {t("push.test")}
+            </Button>
+          )}
+
           <div className="mt-2">
             <p className="mb-2 flex items-center gap-1.5 text-sm font-medium">
               <Bell className="size-4" /> {t("profile.searches")}
