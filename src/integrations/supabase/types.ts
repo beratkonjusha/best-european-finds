@@ -380,6 +380,38 @@ export type Database = {
           },
         ]
       }
+      push_dispatch_runs: {
+        Row: {
+          created_at: string
+          dispatch_key: string
+          id: string
+          notified: number
+          saved_search_id: string
+        }
+        Insert: {
+          created_at?: string
+          dispatch_key: string
+          id?: string
+          notified?: number
+          saved_search_id: string
+        }
+        Update: {
+          created_at?: string
+          dispatch_key?: string
+          id?: string
+          notified?: number
+          saved_search_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_dispatch_runs_saved_search_id_fkey"
+            columns: ["saved_search_id"]
+            isOneToOne: false
+            referencedRelation: "saved_searches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       push_subscriptions: {
         Row: {
           created_at: string
@@ -551,11 +583,13 @@ export type Database = {
       }
       sources: {
         Row: {
+          backoff_seconds: number
           base_url: string
           categories: Database["public"]["Enums"]["listing_category"][]
           country_codes: string[]
           enabled: boolean
           fail_count: number
+          fallback_slug: string | null
           health: string
           id: string
           last_error: string | null
@@ -563,14 +597,17 @@ export type Database = {
           last_success_at: string | null
           legal_mode: string
           name: string
+          next_retry_at: string | null
           slug: string
         }
         Insert: {
+          backoff_seconds?: number
           base_url: string
           categories?: Database["public"]["Enums"]["listing_category"][]
           country_codes?: string[]
           enabled?: boolean
           fail_count?: number
+          fallback_slug?: string | null
           health?: string
           id?: string
           last_error?: string | null
@@ -578,14 +615,17 @@ export type Database = {
           last_success_at?: string | null
           legal_mode?: string
           name: string
+          next_retry_at?: string | null
           slug: string
         }
         Update: {
+          backoff_seconds?: number
           base_url?: string
           categories?: Database["public"]["Enums"]["listing_category"][]
           country_codes?: string[]
           enabled?: boolean
           fail_count?: number
+          fallback_slug?: string | null
           health?: string
           id?: string
           last_error?: string | null
@@ -593,6 +633,7 @@ export type Database = {
           last_success_at?: string | null
           legal_mode?: string
           name?: string
+          next_retry_at?: string | null
           slug?: string
         }
         Relationships: []
