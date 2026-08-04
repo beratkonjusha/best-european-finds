@@ -108,6 +108,7 @@ const de: Dict = {
   "translate.showTranslation": "Übersetzung anzeigen",
   "translate.pending": "Wird übersetzt …",
 
+  "results.noneHint": "Es sind gerade keine passenden Live-Anzeigen aus den Quellen vorhanden. Speichere die Suche – du wirst per Push benachrichtigt, sobald neue echte Angebote eintreffen.",
   "nav.profile": "Profil",
   "nav.monitoring": "Monitoring",
 };
@@ -214,6 +215,7 @@ const en: Dict = {
   "translate.showTranslation": "Show translation",
   "translate.pending": "Translating …",
 
+  "results.noneHint": "No matching live listings from the sources right now. Save this search and get a push as soon as new real offers arrive.",
   "nav.profile": "Profile",
   "nav.monitoring": "Monitoring",
 };
@@ -320,6 +322,7 @@ const sq: Dict = {
   "translate.showTranslation": "Shfaq përkthimin",
   "translate.pending": "Duke përkthyer …",
 
+  "results.noneHint": "Për momentin nuk ka njoftime reale nga burimet. Ruaje kërkimin dhe do të njoftohesh sapo të vijnë oferta të reja.",
   "nav.profile": "Profili",
   "nav.monitoring": "Monitorimi",
 };
