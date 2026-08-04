@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { ListingCard, type FeedListing } from "@/components/ListingCard";
+import { ListingCardSkeletonGrid } from "@/components/ListingCardSkeleton";
 import { DEFAULT_FILTERS, FiltersPanel, type Filters } from "@/components/FiltersPanel";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/hooks/useAuth";
@@ -14,7 +15,6 @@ import { useCity, LIST_SELECT } from "@/lib/reference-queries";
 import { boundingBox, relevanceScore, SORTS, DEFAULT_SORT, type SortKey } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import {
   Select,
@@ -251,11 +251,7 @@ function FeedPage() {
         )}
 
         {feed.isPending ? (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-80 rounded-2xl" />
-            ))}
-          </div>
+          <ListingCardSkeletonGrid count={6} />
         ) : listings.length === 0 ? (
           <p className="rounded-2xl border bg-card p-10 text-center text-sm text-muted-foreground">
             {t("results.none")}

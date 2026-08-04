@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { getSnapshots } from "@/lib/offline";
 import { useI18n } from "@/lib/i18n";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ListingCardSkeletonGrid } from "@/components/ListingCardSkeleton";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/saved")({
@@ -82,11 +82,7 @@ function SavedPage() {
               {t("saved.empty")}
             </p>
           ) : q.isPending && merged.length === 0 ? (
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} className="h-80 rounded-2xl" />
-              ))}
-            </div>
+            <ListingCardSkeletonGrid count={3} />
           ) : (
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {merged.map((l) => (
