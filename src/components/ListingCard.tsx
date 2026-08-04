@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
+
 import { Heart, MapPin } from "lucide-react";
 import { PriceBadge } from "./PriceBadge";
 import { useI18n } from "@/lib/i18n";
