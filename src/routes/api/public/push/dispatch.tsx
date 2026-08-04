@@ -11,9 +11,20 @@ type Filters = {
   priceMax?: string;
 };
 
+/** Idempotenz-Fenster: pro Suche + Throttle-Slot genau ein Dispatch. */
+function dispatchKey(searchId: string, throttleMinutes: number) {
+  const slot = Math.floor(Date.now() / (Math.max(throttleMinutes, 1) * 60 * 1000));
+  return `${searchId}:${throttleMinutes}:${slot}`;
+}
+
+/** Endpunkte, die dauerhaft ungültig sind, werden entfernt. */
+function isGone(status: number) {
+  return status === 400 || status === 401 || status === 403 || status === 404 || status === 410;
+}
+
 /**
  * Cron-Endpunkt: prüft gespeicherte Suchen und sendet Push für neue Treffer.
- * Throttle pro Suche, Duplikatschutz über public.push_deliveries.
+ * Throttle pro Suche, Idempotenz pro Zeitfenster, Duplikatschutz über public.push_deliveries.
  */
 export const Route = createFileRoute("/api/public/push/dispatch")({
   server: {
@@ -35,11 +46,23 @@ export const Route = createFileRoute("/api/public/push/dispatch")({
 
         let notified = 0;
         let skipped = 0;
+        let removedTokens = 0;
 
         for (const search of searches ?? []) {
-          const throttle = (search.throttle_minutes ?? 60) * 60 * 1000;
+          const throttleMinutes = search.throttle_minutes ?? 60;
+          const throttle = throttleMinutes * 60 * 1000;
           const last = search.last_notified_at ? Date.parse(search.last_notified_at) : 0;
           if (Date.now() - last < throttle) {
+            skipped += 1;
+            continue;
+          }
+
+          // Idempotenz: parallele/wiederholte Cron-Läufe im selben Slot abweisen.
+          const key = dispatchKey(search.id, throttleMinutes);
+          const { error: claimError } = await supabaseAdmin
+            .from("push_dispatch_runs")
+            .insert({ saved_search_id: search.id, dispatch_key: key });
+          if (claimError) {
             skipped += 1;
             continue;
           }
@@ -71,17 +94,21 @@ export const Route = createFileRoute("/api/public/push/dispatch")({
             continue;
           }
 
-          // Duplikatschutz: nur Anzeigen, die dieser Nutzer noch nie bekam.
-          const { data: seen } = await supabaseAdmin
+          // Serverseitiger Duplikatschutz: Auslieferung vorab reservieren.
+          const { data: claimed } = await supabaseAdmin
             .from("push_deliveries")
-            .select("listing_id")
-            .eq("user_id", search.user_id)
-            .in(
-              "listing_id",
-              matches.map((m) => m.id),
-            );
-          const seenIds = new Set((seen ?? []).map((s) => s.listing_id));
-          const fresh = matches.filter((m) => !seenIds.has(m.id));
+            .upsert(
+              matches.map((m) => ({
+                user_id: search.user_id,
+                saved_search_id: search.id,
+                listing_id: m.id,
+              })),
+              { onConflict: "user_id,listing_id", ignoreDuplicates: true },
+            )
+            .select("listing_id");
+
+          const claimedIds = new Set((claimed ?? []).map((c) => c.listing_id));
+          const fresh = matches.filter((m) => claimedIds.has(m.id));
           if (!fresh.length) {
             skipped += 1;
             continue;
@@ -105,12 +132,15 @@ export const Route = createFileRoute("/api/public/push/dispatch")({
             tag: `search-${search.id}`,
           };
 
+          let deliveredForSearch = 0;
           for (const sub of subs) {
             const res = await sendWebPush(sub as never, payload);
-            if (res.gone) {
+            if (res.gone || isGone(res.status)) {
               await supabaseAdmin.from("push_subscriptions").delete().eq("id", sub.id);
+              removedTokens += 1;
             } else if (res.ok) {
               notified += 1;
+              deliveredForSearch += 1;
               await supabaseAdmin
                 .from("push_subscriptions")
                 .update({ last_success_at: new Date().toISOString() })
@@ -118,14 +148,23 @@ export const Route = createFileRoute("/api/public/push/dispatch")({
             }
           }
 
-          await supabaseAdmin.from("push_deliveries").upsert(
-            fresh.map((m) => ({
-              user_id: search.user_id,
-              saved_search_id: search.id,
-              listing_id: m.id,
-            })),
-            { onConflict: "user_id,listing_id", ignoreDuplicates: true },
-          );
+          // Kein Empfänger erreicht → Reservierung freigeben, damit später erneut zugestellt wird.
+          if (deliveredForSearch === 0) {
+            await supabaseAdmin
+              .from("push_deliveries")
+              .delete()
+              .eq("user_id", search.user_id)
+              .in(
+                "listing_id",
+                fresh.map((m) => m.id),
+              );
+          } else {
+            await supabaseAdmin
+              .from("push_dispatch_runs")
+              .update({ notified: deliveredForSearch })
+              .eq("saved_search_id", search.id)
+              .eq("dispatch_key", key);
+          }
 
           await supabaseAdmin
             .from("saved_searches")
@@ -136,7 +175,7 @@ export const Route = createFileRoute("/api/public/push/dispatch")({
             .eq("id", search.id);
         }
 
-        return Response.json({ ok: true, notified, skipped });
+        return Response.json({ ok: true, notified, skipped, removedTokens });
       },
     },
   },
