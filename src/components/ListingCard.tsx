@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
+
 import { Heart, MapPin } from "lucide-react";
 import { PriceBadge } from "./PriceBadge";
 import { useI18n } from "@/lib/i18n";
@@ -38,33 +40,48 @@ export function ListingCard({
   onToggleFavorite?: (id: string, snapshot?: FeedListing) => void;
 }) {
   const { t, lang } = useI18n();
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [imgFailed, setImgFailed] = useState(false);
   const images = Array.isArray(listing.images) ? (listing.images as string[]) : [];
+  const cover = typeof images[0] === "string" ? images[0] : null;
   const attrs = (listing.attributes ?? {}) as Attributes;
   const attrKeys = orderedAttributes(listing.category, attrs).slice(0, 3);
   const place = listing.cities?.name ?? listing.country_code;
 
   return (
-    <article className="group relative overflow-hidden rounded-2xl border bg-card shadow-card transition-shadow hover:shadow-float">
+    <article className="group relative overflow-hidden rounded-2xl border bg-card shadow-card transition-[transform,box-shadow] duration-300 will-change-transform hover:-translate-y-1 hover:shadow-float motion-reduce:transform-none">
       <Link
         to="/listing/$id"
         params={{ id: listing.id }}
         className="block focus-visible:outline-none"
       >
-        <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-          {images[0] ? (
+        <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
+          {cover && !imgFailed ? (
             <img
-              src={images[0]}
+              src={cover}
               alt={listing.title}
               loading="lazy"
-              className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+              decoding="async"
+              width={800}
+              height={600}
+              onLoad={() => setImgLoaded(true)}
+              onError={() => setImgFailed(true)}
+              className={cn(
+                "absolute inset-0 size-full object-cover transition-[transform,opacity] duration-500 group-hover:scale-[1.04]",
+                imgLoaded ? "opacity-100" : "opacity-0",
+              )}
             />
           ) : (
-            <div className="hero-gradient size-full" />
+            <div className="hero-gradient absolute inset-0 size-full" />
+          )}
+          {cover && !imgFailed && !imgLoaded && (
+            <div className="absolute inset-0 animate-pulse bg-muted" aria-hidden />
           )}
           <div className="absolute left-3 top-3">
             <PriceBadge band={listing.price_band} score={listing.price_score} showDelta />
           </div>
         </div>
+
 
         <div className="space-y-2 p-4">
           <div className="flex items-baseline justify-between gap-3">
