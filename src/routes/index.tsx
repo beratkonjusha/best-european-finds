@@ -253,9 +253,13 @@ function FeedPage() {
         {feed.isPending ? (
           <ListingCardSkeletonGrid count={6} />
         ) : listings.length === 0 ? (
-          <p className="rounded-2xl border bg-card p-10 text-center text-sm text-muted-foreground">
-            {t("results.none")}
-          </p>
+          <div className="rounded-2xl border bg-card p-10 text-center shadow-elev-1">
+            <p className="text-sm text-muted-foreground">{t("results.none")}</p>
+            <p className="mx-auto mt-2 max-w-md text-xs text-muted-foreground">
+              {t("results.noneHint")}
+            </p>
+          </div>
+
         ) : (
           <>
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
