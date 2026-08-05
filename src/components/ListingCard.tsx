@@ -13,6 +13,7 @@ import {
   type PriceBand,
 } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { useListingTranslation } from "@/hooks/useListingTranslation";
 
 export type FeedListing = {
   id: string;
@@ -25,6 +26,7 @@ export type FeedListing = {
   price_band: PriceBand | null;
   price_score: number | null;
   posted_at: string;
+  source_lang?: string | null;
   cities?: { name: string } | null;
   countries?: { name_de: string; name_en: string; name_sq: string } | null;
   sources?: { name: string } | null;
@@ -47,6 +49,10 @@ export function ListingCard({
   const attrs = (listing.attributes ?? {}) as Attributes;
   const attrKeys = orderedAttributes(listing.category, attrs).slice(0, 3);
   const place = listing.cities?.name ?? listing.country_code;
+  const translation = useListingTranslation(listing.id, listing.source_lang, {
+    title: listing.title,
+    description: null,
+  });
 
   return (
     <article className="group relative overflow-hidden rounded-2xl border bg-card shadow-card transition-[transform,box-shadow] duration-300 will-change-transform hover:-translate-y-1 hover:shadow-float motion-reduce:transform-none">
@@ -59,7 +65,7 @@ export function ListingCard({
           {cover && !imgFailed ? (
             <img
               src={cover}
-              alt={listing.title}
+              alt={translation.title}
               loading="lazy"
               decoding="async"
               width={800}
@@ -82,7 +88,6 @@ export function ListingCard({
           </div>
         </div>
 
-
         <div className="space-y-2 p-4">
           <div className="flex items-baseline justify-between gap-3">
             <p className="font-display text-lg font-bold tracking-tight">
@@ -90,7 +95,7 @@ export function ListingCard({
             </p>
             <span className="text-xs text-muted-foreground">{t(`cat.${listing.category}`)}</span>
           </div>
-          <h3 className="line-clamp-2 text-sm font-medium leading-snug">{listing.title}</h3>
+          <h3 className="line-clamp-2 text-sm font-medium leading-snug">{translation.title}</h3>
           <p className="flex items-center gap-1 text-xs text-muted-foreground">
             <MapPin className="size-3.5 shrink-0" />
             <span className="truncate">

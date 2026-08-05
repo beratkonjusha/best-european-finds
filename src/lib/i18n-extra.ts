@@ -37,10 +37,14 @@ const de: Dict = {
   "feed.live": "Live-Suche aktiv",
   "feed.newResults": "{n} neue Anzeigen gefunden",
   "feed.showNew": "Anzeigen",
+  "feed.ingesting": "Echte Quellen werden live durchsucht …",
+  "feed.ingestAccepted": "Live-Suche gestartet. Neue Anzeigen erscheinen automatisch.",
+  "feed.ingestUnavailable":
+    "Die Live-Quelle ist momentan nicht erreichbar. Vorhandene aktuelle Anzeigen werden angezeigt.",
+  "feed.ingestNotConfigured": "Der externe Quellen-Worker ist noch nicht verbunden.",
 
   "network.offline": "Kein Internet",
-  "network.offlineDesc":
-    "Du bist offline. Gespeicherte Anzeigen kannst du weiterhin ansehen.",
+  "network.offlineDesc": "Du bist offline. Gespeicherte Anzeigen kannst du weiterhin ansehen.",
   "network.metered": "Mobile Datenverbindung",
   "network.meteredDesc":
     "Du surfst gerade über Mobilfunk. Möchtest du zu WLAN wechseln oder mit Datenvolumen fortfahren?",
@@ -108,7 +112,8 @@ const de: Dict = {
   "translate.showTranslation": "Übersetzung anzeigen",
   "translate.pending": "Wird übersetzt …",
 
-  "results.noneHint": "Es sind gerade keine passenden Live-Anzeigen aus den Quellen vorhanden. Speichere die Suche – du wirst per Push benachrichtigt, sobald neue echte Angebote eintreffen.",
+  "results.noneHint":
+    "Es sind gerade keine passenden Live-Anzeigen aus den Quellen vorhanden. Speichere die Suche – du wirst per Push benachrichtigt, sobald neue echte Angebote eintreffen.",
   "nav.profile": "Profil",
   "nav.monitoring": "Monitoring",
 };
@@ -147,12 +152,16 @@ const en: Dict = {
   "feed.live": "Live search active",
   "feed.newResults": "{n} new listings found",
   "feed.showNew": "Show",
+  "feed.ingesting": "Searching live sources …",
+  "feed.ingestAccepted": "Live search started. New listings will appear automatically.",
+  "feed.ingestUnavailable":
+    "The live source is temporarily unavailable. Current listings remain visible.",
+  "feed.ingestNotConfigured": "The external source worker is not connected yet.",
 
   "network.offline": "No internet",
   "network.offlineDesc": "You are offline. Saved listings remain available.",
   "network.metered": "Mobile data connection",
-  "network.meteredDesc":
-    "You are on mobile data. Switch to Wi-Fi or continue using mobile data?",
+  "network.meteredDesc": "You are on mobile data. Switch to Wi-Fi or continue using mobile data?",
   "network.openWifi": "Wi-Fi settings",
   "network.continue": "Continue on data",
   "network.back": "Back online",
@@ -215,7 +224,8 @@ const en: Dict = {
   "translate.showTranslation": "Show translation",
   "translate.pending": "Translating …",
 
-  "results.noneHint": "No matching live listings from the sources right now. Save this search and get a push as soon as new real offers arrive.",
+  "results.noneHint":
+    "No matching live listings from the sources right now. Save this search and get a push as soon as new real offers arrive.",
   "nav.profile": "Profile",
   "nav.monitoring": "Monitoring",
 };
@@ -254,6 +264,10 @@ const sq: Dict = {
   "feed.live": "Kërkimi live aktiv",
   "feed.newResults": "{n} shpallje të reja",
   "feed.showNew": "Shfaq",
+  "feed.ingesting": "Po kërkohen burimet live …",
+  "feed.ingestAccepted": "Kërkimi live filloi. Shpalljet e reja shfaqen automatikisht.",
+  "feed.ingestUnavailable": "Burimi live nuk arrihet për momentin. Shfaqen shpalljet aktuale.",
+  "feed.ingestNotConfigured": "Punëtori i jashtëm i burimeve nuk është lidhur ende.",
 
   "network.offline": "Pa internet",
   "network.offlineDesc": "Je offline. Shpalljet e ruajtura mbeten të disponueshme.",
@@ -322,7 +336,8 @@ const sq: Dict = {
   "translate.showTranslation": "Shfaq përkthimin",
   "translate.pending": "Duke përkthyer …",
 
-  "results.noneHint": "Për momentin nuk ka njoftime reale nga burimet. Ruaje kërkimin dhe do të njoftohesh sapo të vijnë oferta të reja.",
+  "results.noneHint":
+    "Për momentin nuk ka njoftime reale nga burimet. Ruaje kërkimin dhe do të njoftohesh sapo të vijnë oferta të reja.",
   "nav.profile": "Profili",
   "nav.monitoring": "Monitorimi",
 };

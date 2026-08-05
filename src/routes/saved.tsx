@@ -40,16 +40,20 @@ function SavedPage() {
   const { online } = useNetworkStatus();
   const { ids, isFavorite, toggle } = useFavorites();
   const [snapshots, setSnapshots] = useState<FeedListing[]>([]);
+  const visibleIds = user ? ids : [];
 
   useEffect(() => {
-    setSnapshots(getSnapshots(ids) as unknown as FeedListing[]);
-  }, [ids]);
+    setSnapshots(getSnapshots(visibleIds) as unknown as FeedListing[]);
+  }, [user, ids]);
 
   const q = useQuery({
-    queryKey: ["saved-listings", ids],
-    enabled: ids.length > 0 && online,
+    queryKey: ["saved-listings", user?.id, visibleIds],
+    enabled: Boolean(user) && visibleIds.length > 0 && online,
     queryFn: async () => {
-      const { data, error } = await supabase.from("listings").select(LIST_SELECT).in("id", ids);
+      const { data, error } = await supabase
+        .from("listings")
+        .select(LIST_SELECT)
+        .in("id", visibleIds);
       if (error) throw error;
       return (data ?? []) as unknown as FeedListing[];
     },
@@ -57,7 +61,7 @@ function SavedPage() {
 
   // Offline oder Fehler → gespeicherte Offline-Kopien anzeigen.
   const live = q.data ?? [];
-  const merged: FeedListing[] = ids
+  const merged: FeedListing[] = visibleIds
     .map((id) => live.find((l) => l.id === id) ?? snapshots.find((s) => s.id === id))
     .filter(Boolean) as FeedListing[];
   const usingOffline = !online || (q.isError && merged.length > 0);
@@ -66,9 +70,7 @@ function SavedPage() {
     <AppShell showBack>
       <div className="mx-auto w-full max-w-6xl px-4 py-10">
         <h1 className="font-display text-2xl font-bold">{t("saved.title")}</h1>
-        {usingOffline && (
-          <p className="mt-2 text-xs text-muted-foreground">{t("offline.badge")}</p>
-        )}
+        {usingOffline && <p className="mt-2 text-xs text-muted-foreground">{t("offline.badge")}</p>}
         {!user && <p className="mt-2 text-sm text-muted-foreground">{t("saved.needAuth")}</p>}
         {!user && (
           <Button asChild className="mt-4" size="sm">
@@ -77,7 +79,7 @@ function SavedPage() {
         )}
 
         <div className="mt-8">
-          {ids.length === 0 ? (
+          {!user ? null : visibleIds.length === 0 ? (
             <p className="rounded-2xl border bg-card p-10 text-center text-sm text-muted-foreground">
               {t("saved.empty")}
             </p>
