@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { SlidersHorizontal, Search, Radio, BellPlus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,6 +15,7 @@ import { useFavorites } from "@/hooks/useFavorites";
 import { useCity, LIST_SELECT } from "@/lib/reference-queries";
 import { boundingBox, relevanceScore, SORTS, DEFAULT_SORT, type SortKey } from "@/lib/format";
 import { Button } from "@/components/ui/button";
+import { startLiveIngest } from "@/lib/live-ingest.functions";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import {
@@ -56,7 +58,10 @@ function FeedPage() {
   const [sort, setSort] = useState<SortKey>(DEFAULT_SORT);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [liveCount, setLiveCount] = useState(0);
+  const [ingesting, setIngesting] = useState(false);
+  const ingestSequence = useRef(0);
   const { isFavorite, toggle } = useFavorites();
+  const requestIngest = useServerFn(startLiveIngest);
 
   const selectedCity = useCity(filters.cityId).data ?? null;
 
@@ -131,7 +136,49 @@ function FeedPage() {
     };
   }, [filters.category, filters.country, filters.q, filters.cityId, sort]);
 
-  const applySearch = () => setFilters((f) => ({ ...f, q: queryInput }));
+  const runLiveSearch = useCallback(
+    async (next: Filters, quiet = false) => {
+      const sequence = ++ingestSequence.current;
+      setFilters(next);
+      setIngesting(true);
+      try {
+        const result = await requestIngest({ data: next });
+        if (sequence !== ingestSequence.current) return;
+        if (!quiet) {
+          if (result.accepted) toast.success(t("feed.ingestAccepted"));
+          else if (result.message === "not_configured") toast.info(t("feed.ingestNotConfigured"));
+          else toast.error(t("feed.ingestUnavailable"));
+        }
+
+        // Der externe Worker schreibt über /api/public/ingest/run. Währenddessen
+        // mehrmals neu laden, damit Treffer auch ohne Realtime-Publikation erscheinen.
+        for (const delay of [0, 1500, 3000, 5000]) {
+          if (delay) await new Promise((resolve) => window.setTimeout(resolve, delay));
+          if (sequence !== ingestSequence.current) return;
+          await feed.refetch();
+        }
+      } catch {
+        if (!quiet) toast.error(t("feed.ingestUnavailable"));
+      } finally {
+        if (sequence === ingestSequence.current) setIngesting(false);
+      }
+    },
+    [requestIngest, t, feed],
+  );
+
+  const applySearch = () => {
+    void runLiveSearch({ ...filters, q: queryInput.trim() });
+  };
+
+  // Texteingaben starten nach kurzer Tipp-Pause automatisch eine Live-Suche.
+  useEffect(() => {
+    const term = queryInput.trim();
+    if (!term || term === filters.q) return;
+    const timer = window.setTimeout(() => {
+      void runLiveSearch({ ...filters, q: term }, true);
+    }, 800);
+    return () => window.clearTimeout(timer);
+  }, [queryInput]);
 
   const saveSearch = async () => {
     if (!user) {
@@ -173,8 +220,8 @@ function FeedPage() {
                 aria-label={t("search.button")}
               />
             </div>
-            <Button type="submit" size="lg" variant="secondary" className="h-12">
-              {t("search.button")}
+            <Button type="submit" size="lg" variant="secondary" className="h-12" disabled={ingesting}>
+              {ingesting ? t("search.running") : t("search.button")}
             </Button>
             <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
               <SheetTrigger asChild>
@@ -196,7 +243,14 @@ function FeedPage() {
                       setQueryInput("");
                     }}
                   />
-                  <Button className="mt-6 w-full" onClick={() => setSheetOpen(false)}>
+                   <Button
+                     className="mt-6 w-full"
+                     onClick={() => {
+                       setSheetOpen(false);
+                       void runLiveSearch({ ...filters, q: queryInput.trim() });
+                     }}
+                     disabled={ingesting}
+                   >
                     {t("filters.apply")}
                   </Button>
                 </div>
@@ -210,7 +264,11 @@ function FeedPage() {
         <div className="mb-5 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:flex-wrap sm:justify-between">
           <div className="flex min-w-0 flex-col gap-1">
             <p className="truncate text-sm text-muted-foreground">
-              {feed.isPending ? t("results.loading") : t("results.count", { n: listings.length })}
+              {ingesting
+                ? t("feed.ingesting")
+                : feed.isPending
+                  ? t("results.loading")
+                  : t("results.count", { n: listings.length })}
             </p>
             <span className="flex items-center gap-1.5 text-xs text-price-great">
               <Radio className="size-3 animate-pulse" />
