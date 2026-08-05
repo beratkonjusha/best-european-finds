@@ -70,19 +70,21 @@ export function AppShell({ children, showBack }: { children: ReactNode; showBack
               <span className="hidden sm:inline">{t("nav.feed")}</span>
             </Link>
           </Button>
-          <Button asChild variant="ghost" size="sm" className="gap-1.5 px-2">
-            <Link to="/saved">
-              <Heart className="size-4" />
-              <span className="hidden sm:inline">{t("nav.saved")}</span>
-            </Link>
-          </Button>
           {user ? (
-            <Button asChild variant="ghost" size="sm" className="gap-1.5 px-2">
-              <Link to="/profile">
-                <User className="size-4" />
-                <span className="hidden sm:inline">{t("profile.title")}</span>
-              </Link>
-            </Button>
+            <>
+              <Button asChild variant="ghost" size="sm" className="gap-1.5 px-2">
+                <Link to="/saved">
+                  <Heart className="size-4" />
+                  <span className="hidden sm:inline">{t("nav.saved")}</span>
+                </Link>
+              </Button>
+              <Button asChild variant="ghost" size="sm" className="gap-1.5 px-2">
+                <Link to="/profile">
+                  <User className="size-4" />
+                  <span className="hidden sm:inline">{t("profile.title")}</span>
+                </Link>
+              </Button>
+            </>
           ) : null}
           <LanguageSwitcher />
           {user ? (
