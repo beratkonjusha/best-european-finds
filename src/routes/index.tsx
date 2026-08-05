@@ -220,7 +220,13 @@ function FeedPage() {
                 aria-label={t("search.button")}
               />
             </div>
-            <Button type="submit" size="lg" variant="secondary" className="h-12" disabled={ingesting}>
+            <Button
+              type="submit"
+              size="lg"
+              variant="secondary"
+              className="h-12"
+              disabled={ingesting}
+            >
               {ingesting ? t("search.running") : t("search.button")}
             </Button>
             <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
@@ -243,14 +249,14 @@ function FeedPage() {
                       setQueryInput("");
                     }}
                   />
-                   <Button
-                     className="mt-6 w-full"
-                     onClick={() => {
-                       setSheetOpen(false);
-                       void runLiveSearch({ ...filters, q: queryInput.trim() });
-                     }}
-                     disabled={ingesting}
-                   >
+                  <Button
+                    className="mt-6 w-full"
+                    onClick={() => {
+                      setSheetOpen(false);
+                      void runLiveSearch({ ...filters, q: queryInput.trim() });
+                    }}
+                    disabled={ingesting}
+                  >
                     {t("filters.apply")}
                   </Button>
                 </div>
@@ -276,7 +282,13 @@ function FeedPage() {
             </span>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={saveSearch}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              onClick={saveSearch}
+            >
               <BellPlus className="size-4" />
               <span className="hidden sm:inline">{t("search.save")}</span>
             </Button>
@@ -317,7 +329,6 @@ function FeedPage() {
               {t("results.noneHint")}
             </p>
           </div>
-
         ) : (
           <>
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

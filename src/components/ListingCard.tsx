@@ -88,7 +88,6 @@ export function ListingCard({
           </div>
         </div>
 
-
         <div className="space-y-2 p-4">
           <div className="flex items-baseline justify-between gap-3">
             <p className="font-display text-lg font-bold tracking-tight">

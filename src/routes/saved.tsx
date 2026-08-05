@@ -50,7 +50,10 @@ function SavedPage() {
     queryKey: ["saved-listings", user?.id, visibleIds],
     enabled: Boolean(user) && visibleIds.length > 0 && online,
     queryFn: async () => {
-      const { data, error } = await supabase.from("listings").select(LIST_SELECT).in("id", visibleIds);
+      const { data, error } = await supabase
+        .from("listings")
+        .select(LIST_SELECT)
+        .in("id", visibleIds);
       if (error) throw error;
       return (data ?? []) as unknown as FeedListing[];
     },
@@ -67,9 +70,7 @@ function SavedPage() {
     <AppShell showBack>
       <div className="mx-auto w-full max-w-6xl px-4 py-10">
         <h1 className="font-display text-2xl font-bold">{t("saved.title")}</h1>
-        {usingOffline && (
-          <p className="mt-2 text-xs text-muted-foreground">{t("offline.badge")}</p>
-        )}
+        {usingOffline && <p className="mt-2 text-xs text-muted-foreground">{t("offline.badge")}</p>}
         {!user && <p className="mt-2 text-sm text-muted-foreground">{t("saved.needAuth")}</p>}
         {!user && (
           <Button asChild className="mt-4" size="sm">
