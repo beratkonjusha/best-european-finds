@@ -37,6 +37,10 @@ const de: Dict = {
   "feed.live": "Live-Suche aktiv",
   "feed.newResults": "{n} neue Anzeigen gefunden",
   "feed.showNew": "Anzeigen",
+  "feed.ingesting": "Echte Quellen werden live durchsucht …",
+  "feed.ingestAccepted": "Live-Suche gestartet. Neue Anzeigen erscheinen automatisch.",
+  "feed.ingestUnavailable": "Die Live-Quelle ist momentan nicht erreichbar. Vorhandene aktuelle Anzeigen werden angezeigt.",
+  "feed.ingestNotConfigured": "Der externe Quellen-Worker ist noch nicht verbunden.",
 
   "network.offline": "Kein Internet",
   "network.offlineDesc":
@@ -147,6 +151,10 @@ const en: Dict = {
   "feed.live": "Live search active",
   "feed.newResults": "{n} new listings found",
   "feed.showNew": "Show",
+  "feed.ingesting": "Searching live sources …",
+  "feed.ingestAccepted": "Live search started. New listings will appear automatically.",
+  "feed.ingestUnavailable": "The live source is temporarily unavailable. Current listings remain visible.",
+  "feed.ingestNotConfigured": "The external source worker is not connected yet.",
 
   "network.offline": "No internet",
   "network.offlineDesc": "You are offline. Saved listings remain available.",
@@ -254,6 +262,10 @@ const sq: Dict = {
   "feed.live": "Kërkimi live aktiv",
   "feed.newResults": "{n} shpallje të reja",
   "feed.showNew": "Shfaq",
+  "feed.ingesting": "Po kërkohen burimet live …",
+  "feed.ingestAccepted": "Kërkimi live filloi. Shpalljet e reja shfaqen automatikisht.",
+  "feed.ingestUnavailable": "Burimi live nuk arrihet për momentin. Shfaqen shpalljet aktuale.",
+  "feed.ingestNotConfigured": "Punëtori i jashtëm i burimeve nuk është lidhur ende.",
 
   "network.offline": "Pa internet",
   "network.offlineDesc": "Je offline. Shpalljet e ruajtura mbeten të disponueshme.",
