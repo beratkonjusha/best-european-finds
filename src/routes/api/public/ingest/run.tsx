@@ -57,126 +57,24 @@ export const Route = createFileRoute("/api/public/ingest/run")({
           );
         }
 
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
-        const { data: source } = await supabaseAdmin
-          .from("sources")
-          .select("id,fail_count,backoff_seconds,fallback_slug")
-          .eq("slug", parsed.source_slug)
-          .maybeSingle();
-
-        if (!source) return Response.json({ ok: false, error: "Unknown source" }, { status: 404 });
-
-        let inserted = 0;
-        if (parsed.listings.length > 0) {
-          // Städte per Name/PLZ + Land auflösen (best effort).
-          const rows = [];
-          for (const l of parsed.listings) {
-            let cityId: string | null = null;
-            let regionId: string | null = null;
-            if (l.city_name || l.postal_code) {
-              const q = supabaseAdmin
-                .from("cities")
-                .select("id,region_id")
-                .eq("country_code", l.country_code)
-                .limit(1);
-              const { data: city } = l.postal_code
-                ? await q.eq("postal_code", l.postal_code)
-                : await q.ilike("name", l.city_name!);
-              cityId = city?.[0]?.id ?? null;
-              regionId = city?.[0]?.region_id ?? null;
-            }
-            rows.push({
-              source_id: source.id,
-              external_id: l.external_id,
-              url: l.url,
-              category: l.category,
-              title: l.title,
-              description: l.description ?? null,
-              price_eur: l.price_eur,
-              currency: l.currency,
-              country_code: l.country_code,
-              city_id: cityId,
-              region_id: regionId,
-              lat: l.lat ?? null,
-              lng: l.lng ?? null,
-              images: l.images,
-              attributes: l.attributes,
-              source_lang: l.source_lang ?? null,
-              posted_at: l.posted_at ?? new Date().toISOString(),
-              fetched_at: new Date().toISOString(),
-              last_seen_at: new Date().toISOString(),
-              active: true,
-            });
-          }
-          const { error, count } = await supabaseAdmin
-            .from("listings")
-            .upsert(rows as never, { onConflict: "source_id,external_id", count: "exact" });
-          if (error) {
-            await supabaseAdmin.from("source_events").insert({
-              source_id: source.id,
-              level: "error",
-              kind: "ingest_write_failed",
-              message: error.message,
-            });
-            return Response.json({ ok: false, error: error.message }, { status: 500 });
-          }
-          inserted = count ?? rows.length;
-        }
-
-        const healthy = parsed.status === "ok";
-        const failCount = healthy ? 0 : (source.fail_count ?? 0) + 1;
-        // Exponentielles Backoff (5 Min → max. 6 h), damit blockierte Quellen nicht hämmern.
-        const backoff = healthy ? 300 : Math.min(300 * 2 ** Math.min(failCount, 7), 21_600);
-        const nextRetryAt = healthy
-          ? null
-          : new Date(Date.now() + backoff * 1000).toISOString();
-
-        await supabaseAdmin
-          .from("sources")
-          .update({
-            health: parsed.status,
-            last_run_at: new Date().toISOString(),
-            fail_count: failCount,
-            backoff_seconds: backoff,
-            next_retry_at: nextRetryAt,
-            ...(healthy
-              ? { last_success_at: new Date().toISOString(), last_error: null }
-              : { last_error: parsed.error ?? parsed.status }),
-          })
-          .eq("id", source.id);
-
-        // Fallback-Quelle aktivieren, sobald eine Quelle mehrfach ausfällt.
-        let fallbackActivated: string | null = null;
-        if (!healthy && failCount >= 3 && source.fallback_slug) {
-          const { data: fb } = await supabaseAdmin
-            .from("sources")
-            .select("id,enabled")
-            .eq("slug", source.fallback_slug)
-            .maybeSingle();
-          if (fb) {
-            if (!fb.enabled) {
-              await supabaseAdmin.from("sources").update({ enabled: true }).eq("id", fb.id);
-            }
-            fallbackActivated = source.fallback_slug;
-          }
-        }
-
-        await supabaseAdmin.from("source_events").insert({
-          source_id: source.id,
-          level: healthy ? "info" : parsed.status === "blocked" ? "warn" : "error",
-          kind: healthy ? "ingest_run" : `ingest_${parsed.status}`,
-          message: parsed.error ?? `${inserted} Anzeigen verarbeitet`,
-          meta: {
-            run_id: parsed.run_id ?? null,
-            count: inserted,
-            fail_count: failCount,
-            next_retry_at: nextRetryAt,
-            fallback: fallbackActivated,
-          },
+        const { storeIngestResult } = await import("@/lib/ingest/store.server");
+        const result = await storeIngestResult({
+          sourceSlug: parsed.source_slug,
+          listings: parsed.listings,
+          status: parsed.status,
+          error: parsed.error ?? null,
+          runId: parsed.run_id ?? null,
         });
 
-        return Response.json({ ok: true, upserted: inserted, retry_after_seconds: healthy ? null : backoff });
+        if (!result.ok) {
+          return Response.json({ ok: false, error: result.error }, { status: result.status });
+        }
+
+        return Response.json({
+          ok: true,
+          upserted: result.upserted,
+          retry_after_seconds: result.retryAfterSeconds,
+        });
       },
     },
   },

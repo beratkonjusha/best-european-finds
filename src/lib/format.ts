@@ -55,14 +55,24 @@ const ATTR_ORDER: Record<Category, string[]> = {
 
 export type Attributes = Record<string, string | number | null | undefined>;
 
+const HIDDEN_ATTRS = new Set(["city_label", "tags"]);
+
 export function orderedAttributes(category: Category, attrs: Attributes) {
+  const usable = (k: string) => {
+    const v = attrs[k];
+    return (
+      !HIDDEN_ATTRS.has(k) &&
+      v !== null &&
+      v !== undefined &&
+      (typeof v === "string" || typeof v === "number")
+    );
+  };
   const keys = ATTR_ORDER[category] ?? [];
-  const known = keys.filter((k) => attrs[k] !== undefined && attrs[k] !== null);
-  const rest = Object.keys(attrs).filter(
-    (k) => !keys.includes(k) && attrs[k] !== null && attrs[k] !== undefined,
-  );
+  const known = keys.filter(usable);
+  const rest = Object.keys(attrs).filter((k) => !keys.includes(k) && usable(k));
   return [...known, ...rest];
 }
+
 
 export function formatAttribute(key: string, value: string | number, lang: Lang): string {
   if (typeof value === "number") {

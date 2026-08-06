@@ -48,7 +48,11 @@ export function ListingCard({
   const cover = typeof images[0] === "string" ? images[0] : null;
   const attrs = (listing.attributes ?? {}) as Attributes;
   const attrKeys = orderedAttributes(listing.category, attrs).slice(0, 3);
-  const place = listing.cities?.name ?? listing.country_code;
+  const place =
+    listing.cities?.name ??
+    (typeof attrs["city_label"] === "string" ? (attrs["city_label"] as string) : null) ??
+    listing.country_code;
+
   const translation = useListingTranslation(listing.id, listing.source_lang, {
     title: listing.title,
     description: null,
